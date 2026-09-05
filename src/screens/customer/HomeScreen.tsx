@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   walletBanner: {
     margin: 20,
-    marginTop: 0,
+    marginTop: 20,
     marginBottom: 20,
     borderRadius: 16,
     padding: 16,

@@ -57,27 +57,63 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
     }
   }
 
+  // async function verify() {
+  //   const code = otp.join('');
+  //   if (code.length < OTP_LENGTH) {
+  //     Alert.alert('Incomplete', 'Please enter all 6 digits.');
+  //     return;
+  //   }
+  //   try {
+  //     setLoading(true);
+  //     const res = await authService.verifyOtp({phone, otp: code, role});
+  //     setAuth(res.tokens, res.user.role, res.user.id, res.user.isProfileComplete);
+  //     if (role === 'astrologer') {
+  //       navigation.navigate('AstrologerRegister');
+  //     } else {
+  //       navigation.navigate('ProfileSetup');
+  //     }
+  //   } catch {
+  //     Alert.alert('Invalid OTP', 'The OTP entered is incorrect or expired.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+
   async function verify() {
-    const code = otp.join('');
-    if (code.length < OTP_LENGTH) {
-      Alert.alert('Incomplete', 'Please enter all 6 digits.');
-      return;
-    }
-    try {
-      setLoading(true);
-      const res = await authService.verifyOtp({phone, otp: code, role});
-      setAuth(res.tokens, res.user.role, res.user.id, res.user.isProfileComplete);
-      if (role === 'astrologer') {
-        navigation.navigate('AstrologerRegister');
-      } else {
-        navigation.navigate('ProfileSetup');
-      }
-    } catch {
-      Alert.alert('Invalid OTP', 'The OTP entered is incorrect or expired.');
-    } finally {
-      setLoading(false);
-    }
+  const code = otp.join('');
+
+  if (code.length < OTP_LENGTH) {
+    Alert.alert('Incomplete', 'Please enter all 6 digits.');
+    return;
   }
+
+  if (code !== '123456') {
+    Alert.alert('Invalid OTP', 'Use OTP 123456 for testing.');
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    setAuth(
+      {
+        accessToken: 'static-access-token',
+        refreshToken: 'static-refresh-token',
+      },
+      role,
+      `static-${phone}`,
+      false,
+    );
+
+    if (role === 'astrologer') {
+      navigation.navigate('AstrologerRegister');
+    } else {
+      navigation.navigate('ProfileSetup');
+    }
+  } finally {
+    setLoading(false);
+  }
+}
 
   async function resend() {
     try {
@@ -103,7 +139,9 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
           {otp.map((digit, i) => (
             <TextInput
               key={i}
-              ref={el => (inputRefs.current[i] = el)}
+              ref={el => {
+                inputRefs.current[i] = el;
+              }}
               style={[
                 styles.box,
                 digit ? styles.boxFill : undefined,

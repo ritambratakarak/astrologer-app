@@ -109,8 +109,8 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         agreementAccepted,
         termsAccepted,
       };
-      const res = await registrationService.submit(payload);
-      navigation.navigate('Submitted', {applicationId: res.applicationId});
+      //const res = await registrationService.submit(payload);
+      navigation.navigate('Submitted', {applicationId: '12345'});
     } catch {
       Alert.alert('Error', 'Could not submit application. Please try again.');
     } finally {

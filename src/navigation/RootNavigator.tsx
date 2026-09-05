@@ -17,7 +17,7 @@ type RootParamList = {
 const Stack = createNativeStackNavigator<RootParamList>();
 
 export default function RootNavigator() {
-  const {isAuthenticated, role, isLoading, initFromStorage} = useAuthStore();
+  const {isAuthenticated, isProfileComplete, role, isLoading, initFromStorage} = useAuthStore();
 
   useEffect(() => {
     initFromStorage();
@@ -34,7 +34,7 @@ export default function RootNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {!isAuthenticated ? (
+        {!isAuthenticated || !isProfileComplete ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : role === 'astrologer' ? (
           <Stack.Screen name="Astrologer" component={AstrologerNavigator} />

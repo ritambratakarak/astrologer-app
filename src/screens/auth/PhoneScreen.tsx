@@ -29,7 +29,7 @@ export default function PhoneScreen({navigation, route}: AuthScreenProps<'Phone'
     }
     try {
       setLoading(true);
-      await authService.sendOtp({phone: cleaned, countryCode: '+91', role});
+      // await authService.sendOtp({phone: cleaned, countryCode: '+91', role});
       navigation.navigate('Otp', {phone: cleaned, role});
     } catch {
       Alert.alert('Error', 'Could not send OTP. Please try again.');

@@ -29,8 +29,9 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
     }
     try {
       setLoading(true);
-      await customerService.updateProfile({name: name.trim(), email: email.trim() || undefined});
+      // await customerService.updateProfile({name: name.trim(), email: email.trim() || undefined});
       setProfileComplete(true);
+
       // Navigation handled by RootNavigator reacting to store state
     } catch {
       Alert.alert('Error', 'Could not save profile. Please try again.');

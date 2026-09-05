@@ -26,7 +26,12 @@ function TabIcon({emoji, label, focused}: {emoji: string; label: string; focused
   return (
     <View style={styles.tabItem}>
       <Text style={styles.tabEmoji}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>{label}</Text>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+        {label}
+      </Text>
       {focused && <View style={styles.tabBar} />}
     </View>
   );
@@ -38,6 +43,7 @@ function CustomerTabs() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabNav,
+        tabBarItemStyle: styles.tabBarItem,
         tabBarShowLabel: false,
       }}>
       <Tab.Screen
@@ -111,17 +117,31 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg2,
     borderTopColor: Colors.border2,
     borderTopWidth: 1,
-    height: 64,
+    height: 60,
+    minHeight: 60,
+    margin: 0,
     paddingBottom: 0,
+    paddingTop: 0,
+    elevation: 0,
   },
+  tabBarItem: {height: 60, paddingVertical: 0},
   tabItem: {
+    width: 72,
+    height: 60,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
-    paddingTop: 8,
+    gap: 1,
+    paddingTop: 20,
   },
-  tabEmoji: {fontSize: 20},
-  tabLabel: {fontSize: 9, fontWeight: '600', color: Colors.t3, letterSpacing: 0.3},
+  tabEmoji: {fontSize: 20, lineHeight: 24},
+  tabLabel: {
+    width: 72,
+    fontSize: 9,
+    fontWeight: '600',
+    color: Colors.t3,
+    letterSpacing: 0.3,
+    textAlign: 'center',
+  },
   tabLabelActive: {color: Colors.gold},
-  tabBar: {width: 22, height: 3, borderRadius: 2, backgroundColor: Colors.gold, marginTop: 2},
+  tabBar: {width: 22, height: 3, borderRadius: 2, backgroundColor: Colors.gold, marginTop: 1},
 });

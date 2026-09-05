@@ -21,7 +21,7 @@ const TIMELINE = [
   {label: 'Go Live!', sub: 'Account approved — start accepting consultations', status: 'pending'},
 ];
 
-export default function SubmittedScreen({route}: AuthScreenProps<'Submitted'>) {
+export default function SubmittedScreen({route, navigation}: AuthScreenProps<'Submitted'>) {
   const {applicationId} = route.params;
   const [toastMsg, setToastMsg] = React.useState('');
   const [toastVisible, setToastVisible] = React.useState(false);
@@ -100,7 +100,8 @@ export default function SubmittedScreen({route}: AuthScreenProps<'Submitted'>) {
 
         <Button
           label="Go to Dashboard →"
-          onPress={() => setProfileComplete(true)}
+          //onPress={() => setProfileComplete(true)}
+          onPress={() => {setProfileComplete(true)}}
           style={{marginTop: 8}}
         />
         <Text style={styles.footer}>
