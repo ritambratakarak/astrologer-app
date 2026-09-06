@@ -11,7 +11,7 @@ import AstrologerChatScreen from '../screens/astrologer/ChatScreen';
 import EarningsScreen from '../screens/astrologer/EarningsScreen';
 import AstrologerProfileScreen from '../screens/astrologer/ProfileScreen';
 import AstrologerNotificationsScreen from '../screens/customer/NotificationsScreen';
-
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 const Tab = createBottomTabNavigator<AstrologerTabParamList>();
 const Stack = createNativeStackNavigator<AstrologerStackParamList>();
 
@@ -31,9 +31,23 @@ function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focu
 }
 
 function AstrologerTabs() {
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = 60 + insets.bottom;
+
   return (
     <Tab.Navigator
-      screenOptions={{ headerShown: false, tabBarStyle: styles.tabNav, tabBarShowLabel: false, tabBarItemStyle: styles.tabBarItem }}>
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: [
+          styles.tabNav,
+          {
+            height: tabBarHeight,
+            paddingBottom: insets.bottom,
+          },
+        ],
+        tabBarShowLabel: false,
+        tabBarItemStyle: styles.tabBarItem,
+      }}>
       <Tab.Screen
         name="DashboardTab"
         component={AstrologerHomeScreen}

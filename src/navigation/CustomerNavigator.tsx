@@ -1,9 +1,9 @@
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text, View, StyleSheet} from 'react-native';
-import {Colors} from '../theme/colors';
-import type {CustomerStackParamList, CustomerTabParamList} from './types';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text, View, StyleSheet } from 'react-native';
+import { Colors } from '../theme/colors';
+import type { CustomerStackParamList, CustomerTabParamList } from './types';
 
 import CustomerHomeScreen from '../screens/customer/HomeScreen';
 import BrowseScreen from '../screens/customer/BrowseScreen';
@@ -18,11 +18,12 @@ import ReviewScreen from '../screens/customer/ReviewScreen';
 import RejectedScreen from '../screens/customer/RejectedScreen';
 import TransactionsScreen from '../screens/customer/TransactionsScreen';
 import NotificationsScreen from '../screens/customer/NotificationsScreen';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator<CustomerTabParamList>();
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
 
-function TabIcon({emoji, label, focused}: {emoji: string; label: string; focused: boolean}) {
+function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
   return (
     <View style={styles.tabItem}>
       <Text style={styles.tabEmoji}>{emoji}</Text>
@@ -38,11 +39,20 @@ function TabIcon({emoji, label, focused}: {emoji: string; label: string; focused
 }
 
 function CustomerTabs() {
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = 60 + insets.bottom;
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabNav,
+        tabBarStyle: [
+          styles.tabNav,
+          {
+            height: tabBarHeight,
+            paddingBottom: insets.bottom,
+          },
+        ],
         tabBarItemStyle: styles.tabBarItem,
         tabBarShowLabel: false,
       }}>
@@ -50,7 +60,7 @@ function CustomerTabs() {
         name="HomeTab"
         component={CustomerHomeScreen}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabIcon emoji="🏠" label="Home" focused={focused} />
           ),
         }}
@@ -59,7 +69,7 @@ function CustomerTabs() {
         name="BrowseTab"
         component={BrowseScreen}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabIcon emoji="🔍" label="Browse" focused={focused} />
           ),
         }}
@@ -68,7 +78,7 @@ function CustomerTabs() {
         name="ConsultTab"
         component={BrowseScreen}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabIcon emoji="💬" label="Consult" focused={focused} />
           ),
         }}
@@ -77,7 +87,7 @@ function CustomerTabs() {
         name="WalletTab"
         component={CustomerWalletScreen}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabIcon emoji="💰" label="Wallet" focused={focused} />
           ),
         }}
@@ -86,7 +96,7 @@ function CustomerTabs() {
         name="ProfileTab"
         component={CustomerProfileScreen}
         options={{
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabIcon emoji="👤" label="Me" focused={focused} />
           ),
         }}
@@ -97,7 +107,7 @@ function CustomerTabs() {
 
 export default function CustomerNavigator() {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CustomerTabs" component={CustomerTabs} />
       <Stack.Screen name="AstrologerDetail" component={AstrologerDetailScreen} />
       <Stack.Screen name="Book" component={BookScreen} />
@@ -124,7 +134,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     elevation: 0,
   },
-  tabBarItem: {height: 60, paddingVertical: 0},
+  tabBarItem: { height: 60, paddingVertical: 0 },
   tabItem: {
     width: 72,
     height: 60,
@@ -133,7 +143,7 @@ const styles = StyleSheet.create({
     gap: 1,
     paddingTop: 20,
   },
-  tabEmoji: {fontSize: 20, lineHeight: 24},
+  tabEmoji: { fontSize: 20, lineHeight: 24 },
   tabLabel: {
     width: 72,
     fontSize: 9,
@@ -142,6 +152,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     textAlign: 'center',
   },
-  tabLabelActive: {color: Colors.gold},
-  tabBar: {width: 22, height: 3, borderRadius: 2, backgroundColor: Colors.gold, marginTop: 1},
+  tabLabelActive: { color: Colors.gold },
+  tabBar: { width: 22, height: 3, borderRadius: 2, backgroundColor: Colors.gold, marginTop: 1 },
 });
