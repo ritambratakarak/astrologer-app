@@ -1,0 +1,841 @@
+{
+  "info": {
+    "name": "AstroApp Mobile API",
+    "_postman_id": "astroapp-mobile-api-v2",
+    "description": "Complete API collection for AstroApp Mobile Frontend.\n\n**Base URL:** `http://98.88.19.190:8000`\n\n**Auth:** All protected routes require `Authorization: Bearer {{token}}` header.\n\n**Quick Start:**\n1. Send OTP → Verify OTP → receive `accessToken` + `refreshToken`\n2. The test script auto-saves tokens to collection variables\n3. Use Refresh Token when accessToken expires",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",        "value": "http://98.88.19.190:8000", "type": "string" },
+    { "key": "api",             "value": "{{base_url}}/api/v1",       "type": "string" },
+    { "key": "token",           "value": "",                          "type": "string", "description": "Auto-set after Verify OTP / Admin Login" },
+    { "key": "refresh_token",   "value": "",                          "type": "string", "description": "Auto-set after Verify OTP" },
+    { "key": "consultation_id", "value": "",                          "type": "string" },
+    { "key": "astrologer_id",   "value": "",                          "type": "string" },
+    { "key": "conversation_id", "value": "",                          "type": "string" },
+    { "key": "notification_id", "value": "",                          "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "description": "OTP-based phone authentication. No token required.",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/auth/send-otp", "host": ["{{api}}"], "path": ["auth", "send-otp"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Send OTP to a phone number.\n\n**Body:**\n- `phone` (required) — valid mobile number\n\nIn development mode the OTP is printed in server logs instead of being sent via SMS."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{api}}/auth/send-otp" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"OTP sent successfully\",\n  \"data\": { \"phone\": \"9876543210\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP (Login / Register)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "  pm.collectionVariables.set('token', json.data.accessToken);",
+                  "  pm.collectionVariables.set('refresh_token', json.data.refreshToken);",
+                  "  console.log('Tokens saved to collection variables.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/auth/verify-otp", "host": ["{{api}}"], "path": ["auth", "verify-otp"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\",\n  \"otp\": \"123456\",\n  \"userType\": \"customer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Verify OTP and login or auto-register the user.\n\n**Body:**\n- `phone` (required)\n- `otp` (required) — 6-digit code\n- `userType` (required) — `customer` | `astrologer`\n\nReturns `accessToken` and `refreshToken`. The test script auto-saves them to collection variables."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{api}}/auth/verify-otp" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"_id\": \"64f1a2b3c4d5e6f7a8b9c0d1\",\n      \"fullName\": \"\",\n      \"phone\": \"9876543210\",\n      \"userType\": \"customer\",\n      \"isProfileCreated\": false,\n      \"isAccountActive\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "  pm.collectionVariables.set('token', json.data.accessToken);",
+                  "  console.log('Access token refreshed.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/auth/refresh", "host": ["{{api}}"], "path": ["auth", "refresh"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Exchange a valid `refreshToken` for a new `accessToken`.\n\nCall this when the API returns a 401 Unauthorized response."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/auth/logout", "host": ["{{api}}"], "path": ["auth", "logout"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Blacklist both access and refresh tokens.\n\n**Headers:** `Authorization: Bearer {{token}}`\n\n**Body:**\n- `refreshToken` (optional but recommended) — also invalidates the refresh token"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Customer",
+      "description": "Customer profile management.\n\n**Requires:** Auth token with `userType: customer`",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/customer/profile", "host": ["{{api}}"], "path": ["customer", "profile"] },
+            "description": "Fetch the logged-in customer's profile."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{api}}/customer/profile" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile fetched successfully\",\n  \"data\": {\n    \"_id\": \"64f1a2b3c4d5e6f7a8b9c0d1\",\n    \"fullName\": \"John Doe\",\n    \"phone\": \"9876543210\",\n    \"email\": \"john@example.com\",\n    \"userType\": \"customer\",\n    \"isProfileCreated\": true,\n    \"isAccountActive\": true,\n    \"createdAt\": \"2024-01-01T00:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/customer/profile", "host": ["{{api}}"], "path": ["customer", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Update customer profile. All fields are optional — only send what needs to be changed."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔮 Astrologer",
+      "description": "Browse astrologers (any auth) and manage astrologer's own profile (astrologer auth).",
+      "item": [
+        {
+          "name": "List Astrologers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/astrologers?page=1&limit=10",
+              "host": ["{{api}}"],
+              "path": ["astrologers"],
+              "query": [
+                { "key": "page",           "value": "1",     "description": "Page number (default: 1)" },
+                { "key": "limit",          "value": "10",    "description": "Items per page (default: 10)" },
+                { "key": "specialization", "value": "vedic", "description": "vedic | tarot | numerology | vastu | palmistry | face_reading | prashna | muhurta | kundali | lal_kitab", "disabled": true },
+                { "key": "language",       "value": "Hindi", "description": "Filter by language e.g. Hindi, English", "disabled": true },
+                { "key": "minRate",        "value": "10",    "description": "Minimum chat rate (INR)", "disabled": true },
+                { "key": "maxRate",        "value": "100",   "description": "Maximum chat rate (INR)", "disabled": true }
+              ]
+            },
+            "description": "Get paginated list of approved astrologers.\n\n**Query params (all optional):**\n- `page`, `limit`\n- `specialization` — filter by expertise\n- `language` — filter by language\n- `minRate`, `maxRate` — filter by chat rate"
+          }
+        },
+        {
+          "name": "Get Astrologer Profile (by ID)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/astrologers/{{astrologer_id}}",
+              "host": ["{{api}}"],
+              "path": ["astrologers", "{{astrologer_id}}"]
+            },
+            "description": "Get a specific astrologer's public profile by their user ID.\n\nSet `{{astrologer_id}}` in collection variables."
+          }
+        },
+        {
+          "name": "Get My Profile (Astrologer)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/astrologer/profile", "host": ["{{api}}"], "path": ["astrologer", "profile"] },
+            "description": "Fetch the logged-in astrologer's own full profile.\n\n**Requires:** Auth token with `userType: astrologer`"
+          }
+        },
+        {
+          "name": "Update My Profile (Astrologer)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/astrologer/profile", "host": ["{{api}}"], "path": ["astrologer", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Experienced vedic astrologer with 10+ years of practice.\",\n  \"experience\": 10,\n  \"chatRate\": 20,\n  \"callRate\": 30,\n  \"videoRate\": 40,\n  \"specializations\": [\"vedic\", \"tarot\"],\n  \"languages\": [\"Hindi\", \"English\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Update astrologer's own profile. All fields are optional.\n\n**Validations:**\n- `bio` — max 1000 characters\n- `experience` — non-negative integer\n- `chatRate`, `callRate`, `videoRate` — non-negative numbers\n- `specializations` — array of: `vedic`, `tarot`, `numerology`, `vastu`, `palmistry`, `face_reading`, `prashna`, `muhurta`, `kundali`, `lal_kitab`\n\n**Requires:** Auth token with `userType: astrologer`"
+          }
+        },
+        {
+          "name": "Set Availability",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/astrologer/availability", "host": ["{{api}}"], "path": ["astrologer", "availability"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"chat\",\n  \"available\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Toggle online/offline availability for a specific consultation type.\n\n**Body:**\n- `type` — `chat` | `call` | `video`\n- `available` — `true` | `false`\n\n**Requires:** Auth token with `userType: astrologer`"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📋 Astrologer Registration (KYC)",
+      "description": "Astrologer onboarding/KYC flow.\n\n**Requires:** Auth token with `userType: astrologer`\n\n**Step-by-step flow:**\n1. Upload profile photo → get URL\n2. Upload PAN photo → get URL\n3. Upload Aadhar photo → get URL\n4. Upload certificates (optional) → get URLs\n5. Submit KYC with all URLs + personal/bank details\n6. Poll registration status until `approved`",
+      "item": [
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{api}}/astrologer/registration/upload-document",
+              "host": ["{{api}}"],
+              "path": ["astrologer", "registration", "upload-document"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file",         "type": "file",  "description": "Image file (jpg / png / pdf)" },
+                { "key": "documentName", "type": "text",  "value": "Profile Photo",  "description": "Human-readable label" },
+                { "key": "documentType", "type": "text",  "value": "profilePhoto",   "description": "profilePhoto | panPhoto | aadharPhoto | certificate | other" }
+              ]
+            },
+            "description": "Upload a single document. Returns the file URL to reference in Submit KYC.\n\n**Content-Type:** `multipart/form-data`\n\n**`documentType` values:**\n- `profilePhoto`\n- `panPhoto`\n- `aadharPhoto`\n- `certificate`\n- `other`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{api}}/astrologer/registration/upload-document" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Document uploaded successfully.\",\n  \"data\": {\n    \"_id\": \"doc_64f1a2b3c4d5e6f7\",\n    \"documentName\": \"Profile Photo\",\n    \"documentType\": \"profilePhoto\",\n    \"url\": \"/uploads/1700000000000-profile.jpg\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get My Documents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/astrologer/registration/documents",
+              "host": ["{{api}}"],
+              "path": ["astrologer", "registration", "documents"]
+            },
+            "description": "List all documents previously uploaded by this astrologer."
+          }
+        },
+        {
+          "name": "Submit KYC",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{api}}/astrologer/registration/kyc",
+              "host": ["{{api}}"],
+              "path": ["astrologer", "registration", "kyc"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Ravi Sharma\",\n  \"degree\": \"M.A. in Jyotish Vidya\",\n  \"experience\": 8,\n  \"secondaryContact\": \"9123456789\",\n  \"profilePhotoUrl\": \"/uploads/1700000000000-profile.jpg\",\n  \"panCard\": {\n    \"number\": \"ABCDE1234F\",\n    \"photoUrl\": \"/uploads/1700000000001-pan.jpg\"\n  },\n  \"aadharCard\": {\n    \"number\": \"123456789012\",\n    \"photoUrl\": \"/uploads/1700000000002-aadhar.jpg\"\n  },\n  \"certificateUrls\": [\n    \"/uploads/1700000000003-cert.jpg\"\n  ],\n  \"address\": {\n    \"street\": \"123 Temple Road\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\",\n    \"country\": \"India\"\n  },\n  \"bankDetails\": {\n    \"accountHolderName\": \"Ravi Sharma\",\n    \"accountNumber\": \"9876543210123\",\n    \"bankName\": \"State Bank of India\",\n    \"ifscCode\": \"SBIN0001234\",\n    \"upiId\": \"ravi@upi\"\n  },\n  \"specializations\": [\"vedic\", \"kundali\"],\n  \"languages\": [\"Hindi\", \"English\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Submit KYC details. Use URLs returned from the Upload Document API.\n\n**Required fields:**\n- `fullName`, `degree`, `experience` (years), `secondaryContact`\n- `profilePhotoUrl` — from upload API\n- `panCard.number` (format: `ABCDE1234F`), `panCard.photoUrl`\n- `aadharCard.number` (12 digits), `aadharCard.photoUrl`\n- `address.city`, `address.state`, `address.pincode` (6 digits)\n- `bankDetails.accountHolderName`, `accountNumber`, `bankName`\n- `bankDetails.ifscCode` (format: `ABCD0XXXXXX`)\n\n**Optional:** `certificateUrls[]`, `address.street`, `bankDetails.upiId`, `specializations[]`, `languages[]`"
+          }
+        },
+        {
+          "name": "Get Registration Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/astrologer/registration/status",
+              "host": ["{{api}}"],
+              "path": ["astrologer", "registration", "status"]
+            },
+            "description": "Check the current KYC approval status.\n\n**Possible statuses:** `pending` | `approved` | `rejected` | `suspended`\n\nIf `rejected`, the response includes `rejectionReason`."
+          },
+          "response": [
+            {
+              "name": "Pending",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{api}}/astrologer/registration/status" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"pending\",\n    \"isKycSubmitted\": true,\n    \"rejectionReason\": null\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "📞 Consultation",
+      "description": "Book and manage consultations between customers and astrologers.\n\n**Requires:** Auth token (customer or astrologer)",
+      "item": [
+        {
+          "name": "Create Consultation (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/consultations", "host": ["{{api}}"], "path": ["consultations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"astrologerId\": \"{{astrologer_id}}\",\n  \"type\": \"chat\",\n  \"customerNote\": \"I need guidance about my career path.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Book a consultation with an astrologer. Customer only.\n\n**Body:**\n- `astrologerId` (required) — target astrologer's user ID\n- `type` (required) — `chat` | `call` | `video`\n- `customerNote` (optional) — initial message/question"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{api}}/consultations" } },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Consultation created\",\n  \"data\": {\n    \"_id\": \"cons_64f1a2b3c4d5e6f7\",\n    \"astrologerId\": \"...\",\n    \"customerId\": \"...\",\n    \"type\": \"chat\",\n    \"status\": \"pending\",\n    \"customerNote\": \"I need guidance about my career path.\",\n    \"createdAt\": \"2024-01-01T00:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List My Consultations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/consultations?page=1&limit=10",
+              "host": ["{{api}}"],
+              "path": ["consultations"],
+              "query": [
+                { "key": "page",   "value": "1",         "description": "Page number" },
+                { "key": "limit",  "value": "10",        "description": "Items per page" },
+                { "key": "status", "value": "pending",   "description": "pending | active | completed | cancelled", "disabled": true }
+              ]
+            },
+            "description": "List consultations for the logged-in user.\n\nAutomatically returns customer's or astrologer's consultations based on the token's `userType`."
+          }
+        },
+        {
+          "name": "Get Consultation by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/consultations/{{consultation_id}}",
+              "host": ["{{api}}"],
+              "path": ["consultations", "{{consultation_id}}"]
+            },
+            "description": "Get full details of a single consultation by ID."
+          }
+        },
+        {
+          "name": "Respond to Consultation (Astrologer)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{api}}/consultations/{{consultation_id}}/respond",
+              "host": ["{{api}}"],
+              "path": ["consultations", "{{consultation_id}}", "respond"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accept\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Astrologer accepts or rejects a pending consultation request.\n\n**Body:**\n- `accept: true` → status becomes `active` (session begins)\n- `accept: false` → status becomes `cancelled`\n\n**Requires:** Auth token with `userType: astrologer`"
+          }
+        },
+        {
+          "name": "End Consultation",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{api}}/consultations/{{consultation_id}}/end",
+              "host": ["{{api}}"],
+              "path": ["consultations", "{{consultation_id}}", "end"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "End an active consultation and mark it as `completed`.\n\nCan be triggered by either the customer or astrologer."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💬 Chat",
+      "description": "Chat message history. Real-time messaging is via Socket.IO — these REST APIs load message history.\n\n**Requires:** Auth token",
+      "item": [
+        {
+          "name": "Get Chat Messages",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/chat/{{consultation_id}}/messages?page=1&limit=50",
+              "host": ["{{api}}"],
+              "path": ["chat", "{{consultation_id}}", "messages"],
+              "query": [
+                { "key": "page",  "value": "1",  "description": "Page number (most recent first)" },
+                { "key": "limit", "value": "50", "description": "Messages per page" }
+              ]
+            },
+            "description": "Fetch paginated chat messages for a consultation.\n\nTo load older messages, increment `page`. Messages are sorted newest first."
+          }
+        },
+        {
+          "name": "Mark Messages as Read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{api}}/chat/conversations/{{conversation_id}}/read",
+              "host": ["{{api}}"],
+              "path": ["chat", "conversations", "{{conversation_id}}", "read"]
+            },
+            "description": "Mark all messages in a conversation as read for the logged-in user. Resets unread badge count.\n\nSet `{{conversation_id}}` from the consultation object."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💰 Wallet",
+      "description": "Wallet balance and Razorpay recharge flow.\n\n**Recharge flow:**\n1. Create Payment Order → get `orderId`\n2. Pass `orderId`, `amount`, `currency`, `keyId` to Razorpay SDK\n3. On payment success, call Verify Payment with the SDK response",
+      "item": [
+        {
+          "name": "Get Wallet Balance",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{api}}/wallet", "host": ["{{api}}"], "path": ["wallet"] },
+            "description": "Get the logged-in user's current wallet balance."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{api}}/wallet" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"balance\": 500.00,\n    \"currency\": \"INR\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Payment Order (Step 1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/wallet/create-order", "host": ["{{api}}"], "path": ["wallet", "create-order"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Create a Razorpay order for wallet recharge.\n\n**Body:**\n- `amount` (required) — amount in INR, minimum 1\n\nReturns `orderId`, `amount` (in paise), `currency`, `keyId` — pass these to Razorpay SDK."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{api}}/wallet/create-order" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"orderId\": \"order_XXXXXXXXXX\",\n    \"amount\": 50000,\n    \"currency\": \"INR\",\n    \"keyId\": \"rzp_test_XXXXXXXXXX\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify Payment & Credit Wallet (Step 2)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/wallet/verify-payment", "host": ["{{api}}"], "path": ["wallet", "verify-payment"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"order_XXXXXXXXXX\",\n  \"paymentId\": \"pay_XXXXXXXXXX\",\n  \"signature\": \"razorpay_signature_string_from_sdk\",\n  \"amount\": 500\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Verify the Razorpay payment and credit the wallet.\n\nCall this after the Razorpay SDK payment sheet closes successfully.\n\n**Body (all required):**\n- `orderId` — `razorpay_order_id` from SDK callback\n- `paymentId` — `razorpay_payment_id` from SDK callback\n- `signature` — `razorpay_signature` from SDK callback\n- `amount` — same amount in INR passed to Create Order"
+          }
+        },
+        {
+          "name": "Get Transaction History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/wallet/transactions?page=1&limit=20",
+              "host": ["{{api}}"],
+              "path": ["wallet", "transactions"],
+              "query": [
+                { "key": "page",  "value": "1",      "description": "Page number" },
+                { "key": "limit", "value": "20",     "description": "Items per page" },
+                { "key": "type",  "value": "credit", "description": "Filter: credit | debit", "disabled": true }
+              ]
+            },
+            "description": "Get paginated wallet transaction history."
+          }
+        },
+        {
+          "name": "Razorpay Webhook",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",         "value": "application/json" },
+              { "key": "x-razorpay-signature", "value": "WEBHOOK_SIGNATURE_FROM_RAZORPAY", "description": "Razorpay HMAC-SHA256 signature" }
+            ],
+            "url": { "raw": "{{api}}/wallet/webhook", "host": ["{{api}}"], "path": ["wallet", "webhook"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {}\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Razorpay webhook receiver — called by Razorpay servers automatically.\n\n**Do NOT call this manually in production.**\n\nConfigure URL in Razorpay Dashboard → Webhooks:\n`http://98.88.19.190:8000/api/v1/wallet/webhook`\n\nThe `x-razorpay-signature` header is added by Razorpay for verification."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⭐ Reviews",
+      "description": "Astrologer reviews after completed consultations.\n\n**Create review:** Customer auth required\n**List reviews:** Any auth",
+      "item": [
+        {
+          "name": "Submit Review (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{api}}/reviews", "host": ["{{api}}"], "path": ["reviews"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultationId\": \"{{consultation_id}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent session! Very accurate predictions and great guidance.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Submit a review after a completed consultation.\n\n**Body:**\n- `consultationId` (required)\n- `rating` (required) — integer 1–5\n- `comment` (optional) — max 500 characters\n\n**Requires:** Auth token with `userType: customer`"
+          }
+        },
+        {
+          "name": "List Reviews for Astrologer",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/astrologers/{{astrologer_id}}/reviews?page=1&limit=10",
+              "host": ["{{api}}"],
+              "path": ["astrologers", "{{astrologer_id}}", "reviews"],
+              "query": [
+                { "key": "page",  "value": "1",  "description": "Page number" },
+                { "key": "limit", "value": "10", "description": "Items per page" }
+              ]
+            },
+            "description": "Get paginated reviews for a specific astrologer."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔔 Notifications",
+      "description": "In-app notifications.\n\n**Requires:** Auth token",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api}}/notifications?page=1&limit=20",
+              "host": ["{{api}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "page",   "value": "1",    "description": "Page number" },
+                { "key": "limit",  "value": "20",   "description": "Items per page" },
+                { "key": "unread", "value": "true", "description": "Only return unread notifications", "disabled": true }
+              ]
+            },
+            "description": "Fetch paginated in-app notifications for the logged-in user."
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{api}}/notifications/{{notification_id}}/read",
+              "host": ["{{api}}"],
+              "path": ["notifications", "{{notification_id}}", "read"]
+            },
+            "description": "Mark a single notification as read."
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{api}}/notifications/read-all",
+              "host": ["{{api}}"],
+              "path": ["notifications", "read-all"]
+            },
+            "description": "Mark all notifications as read for the logged-in user in one call."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛡️ Admin API",
+      "description": "Admin REST API for backend integrations.\n\n**Login credentials:**\n- `admin@astrologerapp.com` / `Admin@123` (admin)\n- `superadmin@astrologerapp.com` / `Admin@123` (superadmin)\n- `hr@astrologerapp.com` / `Admin@123` (hr)\n\nThe Admin Login request auto-saves the token to `{{token}}`.",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "  pm.collectionVariables.set('token', json.data.accessToken);",
+                  "  console.log('Admin token saved.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/v1/admin/login", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@astrologerapp.com\",\n  \"password\": \"Admin@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Admin login via email + password. Returns a JWT for admin API access.\n\nTest script auto-saves token to `{{token}}`."
+          }
+        },
+        {
+          "name": "Admin — Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/v1/admin/me", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "me"] },
+            "description": "Get the logged-in admin's profile and role."
+          }
+        },
+        {
+          "name": "Admin — Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/v1/admin/dashboard", "host": ["{{base_url}}"], "path": ["api", "v1", "admin", "dashboard"] },
+            "description": "Get high-level stats: total users, revenue, active consultations, etc."
+          }
+        },
+        {
+          "name": "Admin — List Astrologers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/astrologers?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "astrologers"],
+              "query": [
+                { "key": "page",   "value": "1",       "description": "Page number" },
+                { "key": "limit",  "value": "10",      "description": "Items per page" },
+                { "key": "status", "value": "pending",  "description": "pending | approved | rejected | suspended", "disabled": true }
+              ]
+            },
+            "description": "List all astrologers. Filter by `status` to find pending KYC approvals."
+          }
+        },
+        {
+          "name": "Admin — Update Astrologer KYC Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/astrologers/{{astrologer_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "astrologers", "{{astrologer_id}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Approve, reject, or suspend an astrologer's KYC.\n\n**Body:**\n- `status` — `approved` | `rejected` | `suspended` | `pending`"
+          }
+        },
+        {
+          "name": "Admin — Toggle Astrologer Account",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/astrologers/{{astrologer_id}}/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "astrologers", "{{astrologer_id}}", "toggle"]
+            },
+            "description": "Enable or disable an astrologer's account (toggles `isAccountActive`)."
+          }
+        },
+        {
+          "name": "Admin — List Customers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/customers?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "customers"],
+              "query": [
+                { "key": "page",  "value": "1",  "description": "Page number" },
+                { "key": "limit", "value": "10", "description": "Items per page" }
+              ]
+            },
+            "description": "List all customers."
+          }
+        },
+        {
+          "name": "Admin — Toggle Customer Account",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/customers/{{astrologer_id}}/toggle",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "customers", "{{astrologer_id}}", "toggle"]
+            },
+            "description": "Enable or disable a customer's account (toggles `isAccountActive`)."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🩺 Health",
+      "description": "Server status checks. No auth required.",
+      "item": [
+        {
+          "name": "API Status",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/", "host": ["{{base_url}}"], "path": [""] },
+            "description": "Basic check that the server is running."
+          },
+          "response": [
+            {
+              "name": "Running",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{ \"status\": \"AstrologerApp API running\" }"
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/healthz", "host": ["{{base_url}}"], "path": ["healthz"] },
+            "description": "Detailed health check — returns uptime, PID."
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/healthz" } },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"status\": \"ok\",\n  \"uptime\": 3600.12,\n  \"pid\": 10119\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get CSRF Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/csrf-token", "host": ["{{base_url}}"], "path": ["csrf-token"] },
+            "description": "Get a CSRF token. Required by web browser clients using cookie-based sessions."
+          }
+        }
+      ]
+    }
+
+  ]
+}
