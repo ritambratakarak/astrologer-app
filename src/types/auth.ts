@@ -14,7 +14,7 @@ export interface SendOtpRequest {
 export interface VerifyOtpRequest {
   phone: string;
   otp: string;
-  role: UserRole;
+  userType: UserRole;
 }
 
 export interface AuthResponse {
@@ -30,4 +30,34 @@ export interface AuthResponse {
 
 export interface RefreshTokenResponse {
   accessToken: string;
+}
+
+export interface SendOtpResponse {
+  status: number;
+  success: boolean;
+  data: {
+    message: string;
+    otp: string;
+  };
+  message: string;
+  requestId: string;
+}
+
+export interface VerifyOtpApiResponse {
+  status: number;
+  success: boolean;
+  data: {
+    login: boolean;
+    accessToken: string;
+    user: {
+      userId: string;
+      userType: UserRole;
+      phone: string;
+      isProfileCreated: boolean;
+    };
+    refreshToken: string;
+    isNewUser: boolean;
+  };
+  message: string;
+  requestId: string;
 }

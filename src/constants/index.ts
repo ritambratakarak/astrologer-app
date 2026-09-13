@@ -1,15 +1,14 @@
 import {Platform} from 'react-native';
 
-export const API_BASE_URL =
-  Platform.OS === 'android'
-    ? 'http://10.0.2.2:4000/api/v1'
-    : 'http://localhost:4000/api/v1';
+export const API_BASE_URL = 'http://98.88.19.190:8000/api/v1';
+export const CSRF_TOKEN_URL = 'http://98.88.19.190:8000/csrf-token';
 
 export const TOKEN_KEYS = {
   ACCESS: 'astro_access_token',
   REFRESH: 'astro_refresh_token',
   ROLE: 'astro_role',
   USER_ID: 'astro_user_id',
+  CSRF: 'astro_csrf_token',
 } as const;
 
 export const CONSULTATION_TYPES = {

@@ -6,6 +6,7 @@ import axios, {
 } from 'axios';
 import {API_BASE_URL} from '../constants';
 import {tokenManager} from '../security/tokenManager';
+import {csrfTokenManager} from '../security/csrfTokenManager';
 import {Endpoints} from './endpoints';
 import type {RefreshTokenResponse} from '../types/auth';
 
@@ -37,13 +38,23 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Attach Bearer token to every request
+// Attach Bearer token and CSRF token to every request
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
     const token = tokenManager.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Fetch and attach CSRF token
+    try {
+      const csrfToken = await csrfTokenManager.getOrFetchCsrfToken();
+      config.headers['x-csrf-token'] = csrfToken;
+    } catch (error) {
+      console.warn('Failed to attach CSRF token:', error);
+      // Continue with request even if CSRF token fetch fails
+    }
+    
     return config;
   },
   (error: AxiosError) => Promise.reject(error),

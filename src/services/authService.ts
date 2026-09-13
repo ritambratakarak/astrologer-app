@@ -1,15 +1,18 @@
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import {tokenManager} from '../security/tokenManager';
+import {csrfTokenManager} from '../security/csrfTokenManager';
 import type {
   SendOtpRequest,
   VerifyOtpRequest,
   AuthResponse,
+  SendOtpResponse,
+  VerifyOtpApiResponse,
 } from '../types/auth';
 
 export const authService = {
-  async sendOtp(payload: SendOtpRequest): Promise<{message: string}> {
-    const {data} = await apiClient.post<{message: string}>(
+  async sendOtp(payload: SendOtpRequest): Promise<SendOtpResponse> {
+    const {data} = await apiClient.post<SendOtpResponse>(
       Endpoints.auth.sendOtp,
       payload,
     );
@@ -17,14 +20,29 @@ export const authService = {
   },
 
   async verifyOtp(payload: VerifyOtpRequest): Promise<AuthResponse> {
-    const {data} = await apiClient.post<AuthResponse>(
+    const {data: apiResponse} = await apiClient.post<VerifyOtpApiResponse>(
       Endpoints.auth.verifyOtp,
       payload,
     );
-    tokenManager.saveTokens(data.tokens);
-    tokenManager.saveRole(data.user.role);
-    tokenManager.saveUserId(data.user.id);
-    return data;
+    
+    // Transform API response to AuthResponse format
+    const authResponse: AuthResponse = {
+      tokens: {
+        accessToken: apiResponse.data.accessToken,
+        refreshToken: apiResponse.data.refreshToken,
+      },
+      user: {
+        id: apiResponse.data.user.userId,
+        phone: apiResponse.data.user.phone,
+        role: apiResponse.data.user.userType,
+        isProfileComplete: apiResponse.data.user.isProfileCreated,
+      },
+    };
+    
+    tokenManager.saveTokens(authResponse.tokens);
+    tokenManager.saveRole(authResponse.user.role);
+    tokenManager.saveUserId(authResponse.user.id);
+    return authResponse;
   },
 
   async logout(): Promise<void> {
@@ -34,6 +52,7 @@ export const authService = {
       // Always clear local tokens even if server call fails
     } finally {
       tokenManager.clearAll();
+      csrfTokenManager.clearCsrfToken();
     }
   },
 };
