@@ -1,5 +1,3 @@
-import {UserRole} from './auth';
-
 export interface CustomerProfile {
   id: string;
   name: string;
@@ -42,6 +40,6 @@ export interface AstrologerProfile {
 export type UserProfile = CustomerProfile | AstrologerProfile;
 
 export interface ProfileSetupRequest {
-  name: string;
+  fullName: string;
   email?: string;
 }

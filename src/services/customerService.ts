@@ -1,6 +1,15 @@
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
+import {tokenManager} from '../security/tokenManager';
 import type {CustomerProfile, ProfileSetupRequest} from '../types/user';
+
+interface CustomerProfileResponse {
+  status: number;
+  success: boolean;
+  data: CustomerProfile;
+  message: string;
+  requestId: string;
+}
 
 export interface CustomerHomeData {
   recentAstrologers: Array<{
@@ -37,11 +46,17 @@ export const customerService = {
   },
 
   async updateProfile(payload: ProfileSetupRequest): Promise<CustomerProfile> {
-    const {data} = await apiClient.put<CustomerProfile>(
+    const accessToken = tokenManager.getAccessToken();
+    const {data: response} = await apiClient.patch<CustomerProfileResponse>(
       Endpoints.customer.updateProfile,
       payload,
+      {
+        headers: accessToken
+          ? {Authorization: `Bearer ${accessToken}`}
+          : undefined,
+      },
     );
-    return data;
+    return response.data;
   },
 
   async getHome(): Promise<CustomerHomeData> {
