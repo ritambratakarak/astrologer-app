@@ -36,6 +36,14 @@ export const tokenManager = {
     return secureStorage.getString(TOKEN_KEYS.USER_ID);
   },
 
+  saveProfileComplete(isComplete: boolean): void {
+    secureStorage.set(TOKEN_KEYS.PROFILE_COMPLETE, isComplete);
+  },
+
+  getProfileComplete(): boolean {
+    return secureStorage.getBoolean(TOKEN_KEYS.PROFILE_COMPLETE) ?? false;
+  },
+
   updateAccessToken(accessToken: string): void {
     secureStorage.set(TOKEN_KEYS.ACCESS, accessToken);
   },
@@ -45,6 +53,7 @@ export const tokenManager = {
     secureStorage.remove(TOKEN_KEYS.REFRESH);
     secureStorage.remove(TOKEN_KEYS.ROLE);
     secureStorage.remove(TOKEN_KEYS.USER_ID);
+    secureStorage.remove(TOKEN_KEYS.PROFILE_COMPLETE);
   },
 
   hasValidSession(): boolean {

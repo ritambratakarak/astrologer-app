@@ -31,6 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       isAuthenticated: hasSession,
       role,
       userId,
+      isProfileComplete: hasSession && tokenManager.getProfileComplete(),
       isLoading: false,
     });
   },
@@ -39,10 +40,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     tokenManager.saveTokens(tokens);
     tokenManager.saveRole(role);
     tokenManager.saveUserId(userId);
+    tokenManager.saveProfileComplete(isProfileComplete);
     set({isAuthenticated: true, role, userId, isProfileComplete, isLoading: false});
   },
 
-  setProfileComplete: (value) => set({isProfileComplete: value}),
+  setProfileComplete: value => {
+    tokenManager.saveProfileComplete(value);
+    set({isProfileComplete: value});
+  },
 
   logout: async () => {
     await authService.logout();

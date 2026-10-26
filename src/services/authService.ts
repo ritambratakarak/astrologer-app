@@ -38,10 +38,6 @@ export const authService = {
         isProfileComplete: apiResponse.data.user.isProfileCreated,
       },
     };
-    
-    tokenManager.saveTokens(authResponse.tokens);
-    tokenManager.saveRole(authResponse.user.role);
-    tokenManager.saveUserId(authResponse.user.id);
     return authResponse;
   },
 
