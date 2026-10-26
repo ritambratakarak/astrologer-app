@@ -39,10 +39,10 @@ export interface CustomerHomeData {
 
 export const customerService = {
   async getProfile(): Promise<CustomerProfile> {
-    const {data} = await apiClient.get<CustomerProfile>(
+    const {data: response} = await apiClient.get<CustomerProfileResponse>(
       Endpoints.customer.profile,
     );
-    return data;
+    return response.data;
   },
 
   async updateProfile(payload: ProfileSetupRequest): Promise<CustomerProfile> {

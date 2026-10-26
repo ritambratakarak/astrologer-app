@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
@@ -6,6 +6,8 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Colors} from '../../theme/colors';
 import Chip from '../../components/common/Chip';
 import {useAuthStore} from '../../store/authStore';
+import {customerService} from '../../services/customerService';
+import type {CustomerProfile} from '../../types/user';
 import type {CustomerStackParamList} from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
@@ -22,6 +24,27 @@ const MENU = [
 export default function CustomerProfileScreen() {
   const navigation = useNavigation<Nav>();
   const {logout} = useAuthStore();
+  const [profile, setProfile] = useState<CustomerProfile | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    customerService.getProfile()
+      .then(customerProfile => {
+        if (mounted) {
+          setProfile(customerProfile);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          Alert.alert('Error', 'Could not load your profile. Please try again.');
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   function handleLogout() {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -39,8 +62,8 @@ export default function CustomerProfileScreen() {
             <View style={styles.av}><Text style={{fontSize: 36}}>👤</Text></View>
             <View style={styles.editBadge}><Text style={{fontSize: 12}}>✏️</Text></View>
           </View>
-          <Text style={styles.name}>Priya Sharma</Text>
-          <Text style={styles.phone}>+91 98765 43210</Text>
+          <Text style={styles.name}>{profile?.name ?? 'Loading profile...'}</Text>
+          <Text style={styles.phone}>{profile?.phone ?? ''}</Text>
           <View style={styles.chips}>
             <Chip label="✅ Active" variant="green" />
             <Chip label="Customer" variant="gold" />
