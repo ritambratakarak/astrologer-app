@@ -5,7 +5,7 @@ import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import Toast from '../../components/common/Toast';
+import Toast from 'react-native-root-toast';
 import {reviewService} from '../../services/reviewService';
 import type {CustomerScreenProps} from '../../navigation/types';
 
@@ -16,13 +16,12 @@ export default function ReviewScreen({navigation, route}: CustomerScreenProps<'R
   const [rating, setRating] = useState(4);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
 
   async function submit() {
     try {
       setLoading(true);
       await reviewService.submitReview({consultationId, rating, comment: comment.trim() || undefined});
-      setToastVisible(true);
+      Toast.show('Review submitted! Thank you ✨');
       setTimeout(() => navigation.navigate('CustomerTabs'), 2500);
     } catch {
       Alert.alert('Error', 'Could not submit review. Please try again.');
@@ -74,11 +73,6 @@ export default function ReviewScreen({navigation, route}: CustomerScreenProps<'R
         <View style={{height: 40}} />
       </ScrollView>
 
-      <Toast
-        message="Review submitted! Thank you ✨"
-        visible={toastVisible}
-        onHide={() => setToastVisible(false)}
-      />
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {RootSiblingParent} from 'react-native-root-siblings';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {StyleSheet} from 'react-native';
 import {Colors} from './src/theme/colors';
@@ -9,7 +10,9 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <RootNavigator />
+        <RootSiblingParent>
+          <RootNavigator />
+        </RootSiblingParent>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

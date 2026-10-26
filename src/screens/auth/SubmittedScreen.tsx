@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   View,
   Text,
@@ -8,9 +7,9 @@ import {
   Clipboard,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import Toast from 'react-native-root-toast';
 import {Colors} from '../../theme/colors';
 import Button from '../../components/common/Button';
-import Toast from '../../components/common/Toast';
 import {useAuthStore} from '../../store/authStore';
 import type {AuthScreenProps} from '../../navigation/types';
 
@@ -21,16 +20,13 @@ const TIMELINE = [
   {label: 'Go Live!', sub: 'Account approved — start accepting consultations', status: 'pending'},
 ];
 
-export default function SubmittedScreen({route, navigation}: AuthScreenProps<'Submitted'>) {
+export default function SubmittedScreen({route}: AuthScreenProps<'Submitted'>) {
   const {applicationId} = route.params;
-  const [toastMsg, setToastMsg] = React.useState('');
-  const [toastVisible, setToastVisible] = React.useState(false);
   const {setProfileComplete} = useAuthStore();
 
   function copyId() {
     Clipboard.setString(applicationId);
-    setToastMsg('Application ID copied ✓');
-    setToastVisible(true);
+    Toast.show('Application ID copied ✓');
   }
 
   return (
@@ -112,11 +108,6 @@ export default function SubmittedScreen({route, navigation}: AuthScreenProps<'Su
         <View style={{height: 28}} />
       </ScrollView>
 
-      <Toast
-        message={toastMsg}
-        visible={toastVisible}
-        onHide={() => setToastVisible(false)}
-      />
     </SafeAreaView>
   );
 }

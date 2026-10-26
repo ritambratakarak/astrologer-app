@@ -6,7 +6,7 @@ import AppHeader from '../../components/common/AppHeader';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Chip from '../../components/common/Chip';
-import Toast from '../../components/common/Toast';
+import Toast from 'react-native-root-toast';
 import {astrologerService} from '../../services/astrologerService';
 import {useAuthStore} from '../../store/authStore';
 import {SPECIALIZATIONS} from '../../constants';
@@ -24,7 +24,6 @@ export default function AstrologerProfileScreen() {
   const [callRate, setCallRate] = useState('30');
   const [videoRate, setVideoRate] = useState('40');
   const [loading, setLoading] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
 
   function toggleSpec(s: string) {
     setSelectedSpecs(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
@@ -43,7 +42,7 @@ export default function AstrologerProfileScreen() {
         callRate: Number(callRate),
         videoRate: Number(videoRate),
       });
-      setToastVisible(true);
+      Toast.show('Profile updated successfully ✓');
     } catch {
       Alert.alert('Error', 'Could not save profile. Please try again.');
     } finally {
@@ -136,11 +135,6 @@ export default function AstrologerProfileScreen() {
         <View style={{height: 40}} />
       </ScrollView>
 
-      <Toast
-        message="Profile updated successfully ✓"
-        visible={toastVisible}
-        onHide={() => setToastVisible(false)}
-      />
     </SafeAreaView>
   );
 }

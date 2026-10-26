@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import Toast from 'react-native-toast-message';
+import Toast from 'react-native-root-toast';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
@@ -31,10 +31,7 @@ export default function PhoneScreen({navigation, route}: AuthScreenProps<'Phone'
     try {
       setLoading(true);
       const response = await authService.sendOtp({phone: cleaned, countryCode: '+91', role});
-      Toast.show({
-        type: 'success',
-        text1: 'OTP Sent',
-        text2: `Your OTP is: ${response.data.otp}`,
+      Toast.show(`OTP Sent\nYour OTP is: ${response.data.otp}`, {
         duration: 5000,
       });
       navigation.navigate('Otp', {phone: cleaned, role});
