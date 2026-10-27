@@ -10,6 +10,7 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 import axios from 'axios';
+import Toast from 'react-native-root-toast';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
@@ -109,9 +110,12 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
 
   async function resend() {
     try {
-      await authService.sendOtp({phone, countryCode: '+91', role});
+      const response = await authService.sendOtp({phone, countryCode: '+91', role});
       setTimer(60);
       setOtp(Array(OTP_LENGTH).fill(''));
+      Toast.show(`OTP resent\nYour OTP is: ${response.data.otp}`, {
+        duration: 5000,
+      });
     } catch {
       Alert.alert('Error', 'Could not resend OTP.');
     }
