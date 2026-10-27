@@ -36,6 +36,7 @@ export const authService = {
         phone: apiResponse.data.user.phone,
         role: apiResponse.data.user.userType,
         isProfileComplete: apiResponse.data.user.isProfileCreated,
+        name: apiResponse.data.user.name ?? apiResponse.data.user.fullName,
       },
     };
     return authResponse;

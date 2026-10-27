@@ -11,7 +11,14 @@ interface AuthState {
   isProfileComplete: boolean;
 
   initFromStorage: () => void;
-  setAuth: (tokens: AuthTokens, role: UserRole, userId: string, isProfileComplete: boolean) => void;
+  setAuth: (
+    tokens: AuthTokens,
+    role: UserRole,
+    userId: string,
+    isProfileComplete: boolean,
+    phone: string,
+    name?: string,
+  ) => void;
   setProfileComplete: (value: boolean) => void;
   logout: () => Promise<void>;
 }
@@ -36,10 +43,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-  setAuth: (tokens, role, userId, isProfileComplete) => {
+  setAuth: (tokens, role, userId, isProfileComplete, phone, name) => {
     tokenManager.saveTokens(tokens);
     tokenManager.saveRole(role);
     tokenManager.saveUserId(userId);
+    tokenManager.saveUserPhone(phone);
+    if (name?.trim()) {
+      tokenManager.saveUserName(name.trim());
+    }
     tokenManager.saveProfileComplete(isProfileComplete);
     set({isAuthenticated: true, role, userId, isProfileComplete, isLoading: false});
   },

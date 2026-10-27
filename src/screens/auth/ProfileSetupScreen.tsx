@@ -13,6 +13,7 @@ import AppHeader from '../../components/common/AppHeader';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import {customerService} from '../../services/customerService';
+import {tokenManager} from '../../security/tokenManager';
 import {useAuthStore} from '../../store/authStore';
 import type {AuthScreenProps} from '../../navigation/types';
 
@@ -29,10 +30,12 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
     }
     try {
       setLoading(true);
+      const fullName = name.trim();
       await customerService.updateProfile({
-        fullName: name.trim(),
+        fullName,
         email: email.trim() || undefined,
       });
+      tokenManager.saveUserName(fullName);
       setProfileComplete(true);
     } catch {
       Alert.alert('Error', 'Could not save profile. Please try again.');

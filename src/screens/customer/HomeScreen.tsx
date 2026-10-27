@@ -1,18 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Colors} from '../../theme/colors';
 import Chip from '../../components/common/Chip';
-import {customerService} from '../../services/customerService';
+import {tokenManager} from '../../security/tokenManager';
 import type {CustomerStackParamList} from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
@@ -31,27 +30,7 @@ const RECENT = [
 
 export default function CustomerHomeScreen() {
   const navigation = useNavigation<Nav>();
-  const [name, setName] = useState('');
-
-  useEffect(() => {
-    let mounted = true;
-
-    customerService.getProfile()
-      .then(profile => {
-        if (mounted) {
-          setName(profile.name);
-        }
-      })
-      .catch(() => {
-        if (mounted) {
-          Alert.alert('Error', 'Could not load your profile. Please try again.');
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const name = tokenManager.getUserName() ?? '';
 
   return (
     <SafeAreaView style={styles.safe}>

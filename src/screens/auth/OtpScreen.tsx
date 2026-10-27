@@ -66,7 +66,14 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
     try {
       setLoading(true);
       const res = await authService.verifyOtp({phone, otp: code, userType: role});
-      setAuth(res.tokens, res.user.role, res.user.id, res.user.isProfileComplete);
+      setAuth(
+        res.tokens,
+        res.user.role,
+        res.user.id,
+        res.user.isProfileComplete,
+        res.user.phone,
+        res.user.name,
+      );
       if (role === 'astrologer') {
         navigation.navigate('AstrologerRegister');
       } else {

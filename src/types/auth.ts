@@ -24,6 +24,7 @@ export interface AuthResponse {
     phone: string;
     role: UserRole;
     isProfileComplete: boolean;
+    name?: string;
     isApproved?: boolean;
   };
 }
@@ -54,6 +55,8 @@ export interface VerifyOtpApiResponse {
       userType: UserRole;
       phone: string;
       isProfileCreated: boolean;
+      name?: string;
+      fullName?: string;
     };
     refreshToken: string;
     isNewUser: boolean;

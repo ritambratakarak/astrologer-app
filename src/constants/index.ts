@@ -8,6 +8,8 @@ export const TOKEN_KEYS = {
   REFRESH: 'astro_refresh_token',
   ROLE: 'astro_role',
   USER_ID: 'astro_user_id',
+  USER_NAME: 'astro_user_name',
+  USER_PHONE: 'astro_user_phone',
   PROFILE_COMPLETE: 'astro_profile_complete',
   CSRF: 'astro_csrf_token',
 } as const;

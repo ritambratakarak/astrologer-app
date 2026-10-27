@@ -36,6 +36,22 @@ export const tokenManager = {
     return secureStorage.getString(TOKEN_KEYS.USER_ID);
   },
 
+  saveUserName(name: string): void {
+    secureStorage.set(TOKEN_KEYS.USER_NAME, name);
+  },
+
+  getUserName(): string | undefined {
+    return secureStorage.getString(TOKEN_KEYS.USER_NAME);
+  },
+
+  saveUserPhone(phone: string): void {
+    secureStorage.set(TOKEN_KEYS.USER_PHONE, phone);
+  },
+
+  getUserPhone(): string | undefined {
+    return secureStorage.getString(TOKEN_KEYS.USER_PHONE);
+  },
+
   saveProfileComplete(isComplete: boolean): void {
     secureStorage.set(TOKEN_KEYS.PROFILE_COMPLETE, isComplete);
   },
@@ -53,6 +69,8 @@ export const tokenManager = {
     secureStorage.remove(TOKEN_KEYS.REFRESH);
     secureStorage.remove(TOKEN_KEYS.ROLE);
     secureStorage.remove(TOKEN_KEYS.USER_ID);
+    secureStorage.remove(TOKEN_KEYS.USER_NAME);
+    secureStorage.remove(TOKEN_KEYS.USER_PHONE);
     secureStorage.remove(TOKEN_KEYS.PROFILE_COMPLETE);
   },
 
