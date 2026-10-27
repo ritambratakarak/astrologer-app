@@ -2,11 +2,13 @@ import React, {useState} from 'react';
 import {
   View,
   Text,
+  Image,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
   Alert,
 } from 'react-native';
+import ImagePicker, {type Image as PickedImage} from 'react-native-image-crop-picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
@@ -20,8 +22,33 @@ import type {AuthScreenProps} from '../../navigation/types';
 export default function ProfileSetupScreen({navigation}: AuthScreenProps<'ProfileSetup'>) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [avatar, setAvatar] = useState<PickedImage | null>(null);
   const [loading, setLoading] = useState(false);
   const {setProfileComplete} = useAuthStore();
+
+  async function chooseAvatar() {
+    try {
+      const image = await ImagePicker.openPicker({
+        mediaType: 'photo',
+        cropping: true,
+        cropperCircleOverlay: true,
+        width: 500,
+        height: 500,
+        compressImageQuality: 0.8,
+      });
+      setAvatar(image);
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'E_PICKER_CANCELLED'
+      ) {
+        return;
+      }
+      Alert.alert('Image Selection Failed', 'Could not select the profile image. Please try again.');
+    }
+  }
 
   async function submit() {
     if (!name.trim()) {
@@ -58,12 +85,22 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
           <Text style={styles.subtitle}>Tell us about yourself. You can always update this later.</Text>
         </View>
 
-        <TouchableOpacity style={styles.avPick}>
-          <Text style={styles.avIcon}>📷</Text>
+        <TouchableOpacity
+          style={styles.avPick}
+          onPress={chooseAvatar}
+          disabled={loading}
+          accessibilityRole="button"
+          accessibilityLabel="Choose a profile photo">
+          {avatar ? (
+            <Image source={{uri: avatar.path}} style={styles.avatarImage} />
+          ) : (
+            <Text style={styles.avIcon}>📷</Text>
+          )}
           <View style={styles.avBadge}>
             <Text style={{fontSize: 11}}>✏️</Text>
           </View>
         </TouchableOpacity>
+        <Text style={styles.avatarHint}>Tap to choose a profile photo</Text>
 
         <Input
           label="FULL NAME"
@@ -107,6 +144,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 24,
     position: 'relative',
+  },
+  avatarImage: {width: 84, height: 84, borderRadius: 42},
+  avatarHint: {
+    fontSize: 12,
+    color: Colors.t2,
+    textAlign: 'center',
+    marginTop: -16,
+    marginBottom: 24,
   },
   avIcon: {fontSize: 32},
   avBadge: {
