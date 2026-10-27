@@ -9,6 +9,7 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
 } from 'react-native';
+import axios from 'axios';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
@@ -63,24 +64,44 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
       Alert.alert('Incomplete', 'Please enter all 6 digits.');
       return;
     }
+
+    let response: Awaited<ReturnType<typeof authService.verifyOtp>>;
     try {
       setLoading(true);
-      const res = await authService.verifyOtp({phone, otp: code, userType: role});
+      response = await authService.verifyOtp({phone, otp: code, userType: role});
+    } catch (error) {
+      const responseMessage = axios.isAxiosError<{message?: unknown}>(error)
+        ? error.response?.data?.message
+        : undefined;
+      const message = typeof responseMessage === 'string'
+        ? responseMessage
+        : error instanceof Error
+          ? error.message
+          : 'The OTP could not be verified.';
+      Alert.alert('Verification Failed', message);
+      setLoading(false);
+      return;
+    }
+
+    try {
       setAuth(
-        res.tokens,
-        res.user.role,
-        res.user.id,
-        res.user.isProfileComplete,
-        res.user.phone,
-        res.user.name,
+        response.tokens,
+        response.user.role,
+        response.user.id,
+        response.user.isProfileComplete,
+        response.user.phone,
+        response.user.name,
       );
-      if (role === 'astrologer') {
-        navigation.navigate('AstrologerRegister');
-      } else {
-        navigation.navigate('ProfileSetup');
+      if (!response.user.isProfileComplete) {
+        if (role === 'astrologer') {
+          navigation.navigate('AstrologerRegister');
+        } else {
+          navigation.navigate('ProfileSetup');
+        }
       }
-    } catch {
-      Alert.alert('Invalid OTP', 'The OTP entered is incorrect or expired.');
+    } catch (error) {
+      console.error('Failed to establish the session after OTP verification.', error);
+      Alert.alert('Sign-in Failed', 'OTP verified, but sign-in could not be completed.');
     } finally {
       setLoading(false);
     }
