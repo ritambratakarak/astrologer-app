@@ -24,19 +24,29 @@ export const authService = {
       Endpoints.auth.verifyOtp,
       payload,
     );
-    
-    // Transform API response to AuthResponse format
+
+    const responseData = apiResponse.data;
+    const accessToken =
+      responseData.accessToken ?? responseData.tokens?.accessToken;
+    if (!accessToken) {
+      throw new Error('OTP verification succeeded, but the access token was missing.');
+    }
+
+    const user = responseData.user;
     const authResponse: AuthResponse = {
       tokens: {
-        accessToken: apiResponse.data.accessToken,
-        refreshToken: apiResponse.data.refreshToken,
+        accessToken,
+        refreshToken: responseData.refreshToken ?? responseData.tokens?.refreshToken ?? '',
       },
       user: {
-        id: apiResponse.data.user.userId,
-        phone: apiResponse.data.user.phone,
-        role: apiResponse.data.user.userType,
-        isProfileComplete: apiResponse.data.user.isProfileCreated,
-        name: apiResponse.data.user.name ?? apiResponse.data.user.fullName,
+        id: user.userId ?? user.id ?? '',
+        phone: user.phone ?? payload.phone,
+        role: user.userType ?? user.role ?? responseData.userType ?? payload.userType,
+        isProfileComplete:
+          user.isProfileCreated ??
+          user.isProfileComplete ??
+          !(responseData.isNewUser ?? false),
+        name: user.name ?? user.fullName,
       },
     };
     return authResponse;
