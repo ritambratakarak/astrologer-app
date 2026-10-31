@@ -1,5 +1,7 @@
+import axios from 'axios';
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
+import {API_BASE_URL} from '../constants';
 import {tokenManager} from '../security/tokenManager';
 import type {CustomerProfile, ProfileSetupRequest} from '../types/user';
 
@@ -132,15 +134,23 @@ export const customerService = {
       type: image.mime,
     });
 
-    await apiClient.patch<void>(
-      Endpoints.customer.updateProfilePhoto,
+    const {data: response} = await axios.patch<{
+      success?: boolean;
+      message?: string;
+    }>(
+      `${API_BASE_URL}${Endpoints.customer.updateProfilePhoto}`,
       formData,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
         },
+        timeout: 30000,
       },
     );
+    if (response.success === false) {
+      throw new Error(response.message || 'Profile photo update failed.');
+    }
   },
 
   async getHome(): Promise<CustomerHomeData> {

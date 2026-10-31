@@ -45,7 +45,7 @@ export default function CustomerProfileScreen() {
         .getProfile()
         .then(profile => {
           if (isActive) {
-            setAvatarUri(profile.avatar || null);
+            setAvatarUri(profile.profilePhoto || null);
           }
         })
         .catch(() => {
@@ -95,7 +95,7 @@ export default function CustomerProfileScreen() {
       await customerService.updateProfilePhoto(image);
       uploaded = true;
       const profile = await customerService.getProfile();
-      setAvatarUri(profile.avatar || image.path);
+      setAvatarUri(profile.profilePhoto || image.path);
     } catch {
       Alert.alert(
         uploaded ? 'Photo Uploaded' : 'Upload Failed',

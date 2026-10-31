@@ -1,15 +1,7 @@
 export interface CustomerProfile {
-  id: string;
-  name: string;
-  phone: string;
+  fullName: string;
   email?: string;
-  avatar?: string;
-  role: 'customer';
-  walletBalance: number;
-  totalSessions: number;
-  avgRating: number;
-  isActive: boolean;
-  createdAt: string;
+  profilePhoto?: string;
 }
 
 export interface AstrologerProfile {
