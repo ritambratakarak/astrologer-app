@@ -14,6 +14,7 @@ interface CustomerProfileResponse {
 interface ProfilePhotoUploadResponse {
   success: boolean;
   message: string;
+  url: string;
 }
 
 export interface CustomerHomeData {
@@ -93,6 +94,9 @@ export const customerService = {
     );
     if (!data.success) {
       throw new Error(data.message || 'Profile photo upload failed.');
+    }
+    if (typeof data.url !== 'string' || !data.url.trim()) {
+      throw new Error('Profile photo upload response did not include a URL.');
     }
     return data;
   },

@@ -21,6 +21,7 @@
     "react": "19.2.3",
     "react-native": "0.86.0",
     "react-native-gesture-handler": "^3.2.1",
+    "react-native-heroicons": "^4.0.0",
     "react-native-image-crop-picker": "^0.52.0",
     "react-native-mmkv": "^4.3.2",
     "react-native-nitro-modules": "^0.37.1",
@@ -28,6 +29,7 @@
     "react-native-root-toast": "^4.0.1",
     "react-native-safe-area-context": "^5.9.1",
     "react-native-screens": "^4.27.0",
+    "react-native-svg": "^15.16.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

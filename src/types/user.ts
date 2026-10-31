@@ -42,4 +42,5 @@ export type UserProfile = CustomerProfile | AstrologerProfile;
 export interface ProfileSetupRequest {
   fullName: string;
   email?: string;
+  profilePhoto?: string;
 }

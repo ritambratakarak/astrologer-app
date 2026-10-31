@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {ChevronDownIcon, XMarkIcon} from 'react-native-heroicons/outline';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import countries from '../../data/countries.json';
 import {Colors} from '../../theme/colors';
 
@@ -24,6 +26,7 @@ export default function CountryPicker({
 }: CountryPickerProps) {
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState('');
+  const insets = useSafeAreaInsets();
 
   function closePicker() {
     setVisible(false);
@@ -45,7 +48,7 @@ export default function CountryPicker({
         <Text style={[styles.triggerText, !value && styles.placeholder]}>
           {value || 'Select country'}
         </Text>
-        <Text style={styles.triggerIcon}>⌄</Text>
+        <ChevronDownIcon size={20} color={Colors.t2} />
       </TouchableOpacity>
       <Modal
         visible={visible}
@@ -53,14 +56,14 @@ export default function CountryPicker({
         animationType="slide"
         onRequestClose={closePicker}>
         <View style={styles.backdrop}>
-          <View style={styles.modal}>
+          <View style={[styles.modal, {paddingBottom: Math.max(insets.bottom, 12)}]}>
             <View style={styles.header}>
               <Text style={styles.title}>Select Country</Text>
               <TouchableOpacity
                 onPress={closePicker}
                 accessibilityRole="button"
                 accessibilityLabel="Close country selector">
-                <Text style={styles.close}>×</Text>
+                <XMarkIcon size={22} color={Colors.t2} />
               </TouchableOpacity>
             </View>
             <TextInput
@@ -120,14 +123,13 @@ const styles = StyleSheet.create({
   },
   triggerText: {fontSize: 16, color: Colors.text},
   placeholder: {color: Colors.t3},
-  triggerIcon: {fontSize: 20, color: Colors.t2},
   backdrop: {
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.65)',
   },
   modal: {
-    maxHeight: '80%',
+    height: '80%',
     backgroundColor: Colors.bg2,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -142,7 +144,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {fontSize: 18, fontWeight: '700', color: Colors.text},
-  close: {fontSize: 28, lineHeight: 30, color: Colors.t2, paddingHorizontal: 4},
   search: {
     backgroundColor: Colors.card,
     borderWidth: 1.5,

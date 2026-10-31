@@ -23,6 +23,7 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState<PickedImage | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarUploaded, setAvatarUploaded] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,10 +43,12 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
         compressImageQuality: 0.8,
       });
       setAvatar(image);
+      setAvatarUrl(null);
       setAvatarUploaded(false);
       setAvatarUploading(true);
       try {
-        await customerService.uploadProfilePhoto(image);
+        const response = await customerService.uploadProfilePhoto(image);
+        setAvatarUrl(response.url);
         setAvatarUploaded(true);
       } catch {
         Alert.alert(
@@ -77,19 +80,21 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
     try {
       setLoading(true);
       const fullName = name.trim();
-      if (avatar && !avatarUploaded) {
-        setAvatarUploading(true);
-        try {
-          await customerService.uploadProfilePhoto(avatar);
-        } catch (error) {
-          photoUploadFailed = true;
-          throw error;
-        }
-        setAvatarUploaded(true);
-      }
+      // if (avatar && !avatarUploaded) {
+      //   setAvatarUploading(true);
+      //   try {
+      //     const response = await customerService.uploadProfilePhoto(avatar);
+      //     setAvatarUrl(response.url);
+      //   } catch (error) {
+      //     photoUploadFailed = true;
+      //     throw error;
+      //   }
+      //   setAvatarUploaded(true);
+      // }
       await customerService.updateProfile({
         fullName,
         email: email.trim() || undefined,
+        profilePhoto: avatarUrl || undefined,
       });
       tokenManager.saveUserName(fullName);
       setProfileComplete(true);
@@ -127,7 +132,10 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
           accessibilityRole="button"
           accessibilityLabel="Choose a profile photo">
           {avatar ? (
-            <Image source={{uri: avatar.path}} style={styles.avatarImage} />
+            <Image
+              source={{uri: avatarUploaded && avatarUrl ? avatarUrl : avatar.path}}
+              style={styles.avatarImage}
+            />
           ) : (
             <Text style={styles.avIcon}>📷</Text>
           )}
