@@ -92,7 +92,7 @@ export default function CustomerProfileScreen() {
     setPhotoUploading(true);
     let uploaded = false;
     try {
-      await customerService.uploadProfilePhoto(image);
+      await customerService.updateProfilePhoto(image);
       uploaded = true;
       const profile = await customerService.getProfile();
       setAvatarUri(profile.avatar || image.path);

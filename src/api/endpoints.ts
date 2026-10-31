@@ -12,6 +12,7 @@ export const Endpoints = {
     profile: '/customer/profile',
     updateProfile: '/customer/profile',
     uploadProfilePhoto: '/customer/profile/photo',
+    updateProfilePhoto: '/customer/profile/photo',
     home: '/customer/home',
   },
 

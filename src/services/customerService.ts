@@ -115,6 +115,34 @@ export const customerService = {
     };
   },
 
+  async updateProfilePhoto(image: {
+    path: string;
+    mime: string;
+    filename?: string;
+  }): Promise<void> {
+    const accessToken = tokenManager.getAccessToken();
+    if (!accessToken) {
+      throw new Error('You must be signed in to update your profile photo.');
+    }
+
+    const formData = new FormData();
+    formData.append('photo', {
+      uri: image.path,
+      name: image.filename ?? 'profile-photo.jpg',
+      type: image.mime,
+    });
+
+    await apiClient.patch<void>(
+      Endpoints.customer.updateProfilePhoto,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+  },
+
   async getHome(): Promise<CustomerHomeData> {
     const {data} = await apiClient.get<CustomerHomeData>(
       Endpoints.customer.home,
