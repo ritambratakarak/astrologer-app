@@ -336,6 +336,20 @@ Body: {
 
 ## Registration Endpoints
 
+### Upload Astrologer Registration Document
+```
+POST /astrologer/registration/upload-document
+Content-Type: multipart/form-data
+Fields:
+  file: document file
+  documentType: profilePhoto | certificate | aadhaarFront | aadhaarBack
+Response: { "url": "uploaded document URL" }
+```
+
+Documents are selected in the registration form and uploaded when the user submits.
+The returned URLs for the profile photo and certificates are included in the registration
+request. Aadhaar front/back documents are uploaded with their document types.
+
 ### Submit Astrologer Registration
 ```
 POST /astrologer-registration

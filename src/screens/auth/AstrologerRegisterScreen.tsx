@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import {pick, types, isErrorWithCode, errorCodes} from '@react-native-documents/picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import Input from '../../components/common/Input';
@@ -14,7 +15,20 @@ import Button from '../../components/common/Button';
 import {registrationService} from '../../services/registrationService';
 import {SPECIALIZATIONS, LANGUAGES} from '../../constants';
 import type {AuthScreenProps} from '../../navigation/types';
-import type {AstrologerRegistrationData} from '../../types/registration';
+import type {
+  AstrologerRegistrationData,
+  RegistrationDocumentFile,
+  RegistrationDocumentKind,
+} from '../../types/registration';
+
+type DocumentSlot = 'profilePhoto' | 'aadhaarFront' | 'aadhaarBack';
+
+type RegistrationDocuments = {
+  profilePhoto: RegistrationDocumentFile | null;
+  certificates: RegistrationDocumentFile[];
+  aadhaarFront: RegistrationDocumentFile | null;
+  aadhaarBack: RegistrationDocumentFile | null;
+};
 
 const TOTAL_STEPS = 8;
 
@@ -32,6 +46,12 @@ const STEP_TITLES = [
 export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'AstrologerRegister'>) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [documents, setDocuments] = useState<RegistrationDocuments>({
+    profilePhoto: null,
+    certificates: [],
+    aadhaarFront: null,
+    aadhaarBack: null,
+  });
 
   // Form state
   const [fullName, setFullName] = useState('');
@@ -73,6 +93,66 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
     );
   }
 
+  async function chooseDocuments(target: DocumentSlot | 'certificates') {
+    try {
+      const selectedFiles = await pick({
+        type: target === 'profilePhoto' ? [types.images] : [types.images, types.pdf],
+        allowMultiSelection: target === 'certificates',
+      });
+      const files: RegistrationDocumentFile[] = selectedFiles.map((file, index) => ({
+        uri: file.uri,
+        name: file.name ?? `${target}-${Date.now()}-${index + 1}`,
+        type: file.type ?? 'application/octet-stream',
+      }));
+
+      if (target === 'certificates') {
+        setDocuments(current => ({
+          ...current,
+          certificates: [...current.certificates, ...files],
+        }));
+      } else {
+        setDocuments(current => ({...current, [target]: files[0]}));
+      }
+    } catch (error) {
+      if (isErrorWithCode(error) && error.code === errorCodes.OPERATION_CANCELED) {
+        return;
+      }
+      Alert.alert('File Selection Failed', 'Could not select the document. Please try again.');
+    }
+  }
+
+  function markDocumentUploaded(uri: string, uploadedUrl: string) {
+    setDocuments(current => ({
+      profilePhoto:
+        current.profilePhoto?.uri === uri
+          ? {...current.profilePhoto, uploadedUrl}
+          : current.profilePhoto,
+      certificates: current.certificates.map(file =>
+        file.uri === uri ? {...file, uploadedUrl} : file,
+      ),
+      aadhaarFront:
+        current.aadhaarFront?.uri === uri
+          ? {...current.aadhaarFront, uploadedUrl}
+          : current.aadhaarFront,
+      aadhaarBack:
+        current.aadhaarBack?.uri === uri
+          ? {...current.aadhaarBack, uploadedUrl}
+          : current.aadhaarBack,
+    }));
+  }
+
+  async function uploadDocument(
+    file: RegistrationDocumentFile,
+    documentType: RegistrationDocumentKind,
+  ) {
+    if (file.uploadedUrl) {
+      return file.uploadedUrl;
+    }
+    const uploadedUrl = await registrationService.uploadDocument(file, documentType);
+    markDocumentUploaded(file.uri, uploadedUrl);
+    return uploadedUrl;
+  }
+
   async function handleNext() {
     if (step < TOTAL_STEPS) {
       setStep(s => s + 1);
@@ -82,8 +162,24 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
       Alert.alert('Required', 'Please accept the Agreement and Terms before submitting.');
       return;
     }
+    const {profilePhoto, certificates, aadhaarFront, aadhaarBack} = documents;
+    if (!profilePhoto || certificates.length === 0 || !aadhaarFront || !aadhaarBack) {
+      Alert.alert(
+        'Required',
+        'Please select a profile photo, at least one certificate, and both sides of your Aadhaar card.',
+      );
+      return;
+    }
     try {
       setLoading(true);
+      const profilePhotoUrl = await uploadDocument(profilePhoto, 'profilePhoto');
+      const certificateUrls: string[] = [];
+      for (const certificate of certificates) {
+        certificateUrls.push(await uploadDocument(certificate, 'certificate'));
+      }
+      await uploadDocument(aadhaarFront, 'aadhaarFront');
+      await uploadDocument(aadhaarBack, 'aadhaarBack');
+
       const payload: AstrologerRegistrationData = {
         fullName,
         displayName,
@@ -104,15 +200,15 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         ifscCode: ifsc,
         accountHolderName: accountHolder,
         bankName,
-        certificates: [],
-        profilePhoto: '',
+        certificates: certificateUrls,
+        profilePhoto: profilePhotoUrl,
         agreementAccepted,
         termsAccepted,
       };
-      //const res = await registrationService.submit(payload);
-      navigation.navigate('Submitted', {applicationId: '12345'});
+      const response = await registrationService.submit(payload);
+      navigation.navigate('Submitted', {applicationId: response.applicationId});
     } catch {
-      Alert.alert('Error', 'Could not submit application. Please try again.');
+      Alert.alert('Error', 'Could not upload documents or submit the application. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -125,7 +221,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
       {/* Progress header */}
       <View style={styles.progressHdr}>
         {step > 1 && (
-          <TouchableOpacity onPress={() => setStep(s => s - 1)}>
+          <TouchableOpacity onPress={() => setStep(s => s - 1)} disabled={loading}>
             <Text style={styles.backBtn}>←</Text>
           </TouchableOpacity>
         )}
@@ -256,18 +352,76 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         {step === 6 && (
           <>
             <Text style={styles.sectionTitle}>Upload Documents</Text>
-            <Text style={styles.rateNote}>Upload your certificates and profile photo.</Text>
-            {[
-              {label: 'Profile Photo', icon: '🤳'},
-              {label: 'Certificates / Degrees', icon: '📜'},
-              {label: 'Aadhaar Card (front + back)', icon: '🪪'},
-            ].map(doc => (
-              <TouchableOpacity key={doc.label} style={styles.uploadBox}>
-                <Text style={styles.uploadIcon}>{doc.icon}</Text>
-                <Text style={styles.uploadLabel}>{doc.label}</Text>
-                <Text style={styles.uploadBtn}>Upload ↑</Text>
-              </TouchableOpacity>
+            <Text style={styles.rateNote}>
+              Select your documents now. They will be uploaded when you submit your application.
+            </Text>
+            <TouchableOpacity
+              style={styles.uploadBox}
+              onPress={() => chooseDocuments('profilePhoto')}
+              disabled={loading}>
+              <Text style={styles.uploadIcon}>🤳</Text>
+              <Text style={styles.uploadLabel}>Profile Photo</Text>
+              <Text style={styles.uploadBtn}>
+                {documents.profilePhoto?.uploadedUrl ? 'Uploaded ✓' : documents.profilePhoto ? 'Selected' : 'Choose ↑'}
+              </Text>
+            </TouchableOpacity>
+            {documents.profilePhoto && (
+              <Text style={styles.uploadFileName}>{documents.profilePhoto.name}</Text>
+            )}
+
+            <TouchableOpacity
+              style={styles.uploadBox}
+              onPress={() => chooseDocuments('certificates')}
+              disabled={loading}>
+              <Text style={styles.uploadIcon}>📜</Text>
+              <Text style={styles.uploadLabel}>Certificates / Degrees</Text>
+              <Text style={styles.uploadBtn}>
+                {documents.certificates.length > 0
+                  ? `${documents.certificates.length} selected`
+                  : 'Choose ↑'}
+              </Text>
+            </TouchableOpacity>
+            {documents.certificates.map(file => (
+              <View key={file.uri} style={styles.uploadFileRow}>
+                <Text style={styles.uploadFileName}>
+                  {file.name} · {file.uploadedUrl ? 'Uploaded' : 'Selected'}
+                </Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    setDocuments(current => ({
+                      ...current,
+                      certificates: current.certificates.filter(item => item.uri !== file.uri),
+                    }))
+                  }
+                  disabled={loading}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove ${file.name}`}>
+                  <Text style={styles.removeFile}>Remove</Text>
+                </TouchableOpacity>
+              </View>
             ))}
+
+            {([
+              {slot: 'aadhaarFront', label: 'Aadhaar Card — Front'},
+              {slot: 'aadhaarBack', label: 'Aadhaar Card — Back'},
+            ] as const).map(({slot, label}) => {
+              const file = documents[slot];
+              return (
+                <React.Fragment key={slot}>
+                  <TouchableOpacity
+                    style={styles.uploadBox}
+                    onPress={() => chooseDocuments(slot)}
+                    disabled={loading}>
+                    <Text style={styles.uploadIcon}>🪪</Text>
+                    <Text style={styles.uploadLabel}>{label}</Text>
+                    <Text style={styles.uploadBtn}>
+                      {file?.uploadedUrl ? 'Uploaded ✓' : file ? 'Selected' : 'Choose ↑'}
+                    </Text>
+                  </TouchableOpacity>
+                  {file && <Text style={styles.uploadFileName}>{file.name}</Text>}
+                </React.Fragment>
+              );
+            })}
           </>
         )}
 
@@ -394,6 +548,15 @@ const styles = StyleSheet.create({
   uploadIcon: {fontSize: 24},
   uploadLabel: {flex: 1, fontSize: 13, fontWeight: '600', color: Colors.text},
   uploadBtn: {fontSize: 12, color: Colors.gold, fontWeight: '600'},
+  uploadFileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: -4,
+    marginBottom: 10,
+  },
+  uploadFileName: {fontSize: 12, color: Colors.t2, marginTop: -4, marginBottom: 12},
+  removeFile: {fontSize: 12, color: Colors.gold, fontWeight: '600', paddingLeft: 12},
   legalBox: {
     backgroundColor: Colors.card,
     borderWidth: 1,

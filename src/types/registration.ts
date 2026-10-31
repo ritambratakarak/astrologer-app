@@ -48,6 +48,19 @@ export interface AstrologerRegistrationData
   agreementAccepted: boolean;
 }
 
+export type RegistrationDocumentKind =
+  | 'profilePhoto'
+  | 'certificate'
+  | 'aadhaarFront'
+  | 'aadhaarBack';
+
+export interface RegistrationDocumentFile {
+  uri: string;
+  name: string;
+  type: string;
+  uploadedUrl?: string;
+}
+
 export interface RegistrationResponse {
   applicationId: string;
   status: 'submitted' | 'under_review' | 'approved' | 'rejected';

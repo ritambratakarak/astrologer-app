@@ -73,5 +73,6 @@ export const Endpoints = {
   registration: {
     submit: '/astrologer-registration',
     status: '/astrologer-registration/status',
+    uploadDocument: '/astrologer/registration/upload-document',
   },
 } as const;
