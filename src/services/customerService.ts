@@ -13,8 +13,18 @@ interface CustomerProfileResponse {
 
 interface ProfilePhotoUploadResponse {
   success: boolean;
-  message: string;
+  message?: string;
   url: string;
+}
+
+interface ProfilePhotoUploadApiResponse {
+  success: boolean;
+  message?: string;
+  url?: string;
+  data?: {
+    url?: string;
+    avatar?: string;
+  };
 }
 
 export interface CustomerHomeData {
@@ -82,23 +92,27 @@ export const customerService = {
       type: image.mime,
     });
 
-    const {data} = await apiClient.post<ProfilePhotoUploadResponse>(
+    const {data: response} = await apiClient.post<ProfilePhotoUploadApiResponse>(
       Endpoints.customer.uploadProfilePhoto,
       formData,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'multipart/form-data',
         },
       },
     );
-    if (!data.success) {
-      throw new Error(data.message || 'Profile photo upload failed.');
+    if (!response.success) {
+      throw new Error(response.message || 'Profile photo upload failed.');
     }
-    if (typeof data.url !== 'string' || !data.url.trim()) {
+    const url = response.url ?? response.data?.url ?? response.data?.avatar;
+    if (typeof url !== 'string' || !url.trim()) {
       throw new Error('Profile photo upload response did not include a URL.');
     }
-    return data;
+    return {
+      success: response.success,
+      message: response.message,
+      url,
+    };
   },
 
   async getHome(): Promise<CustomerHomeData> {

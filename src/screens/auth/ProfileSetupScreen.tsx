@@ -53,7 +53,7 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       } catch {
         Alert.alert(
           'Upload Failed',
-          'Could not upload the profile photo. It will be retried when you continue.',
+          'Could not upload the profile photo. Select the photo again to retry.',
         );
       } finally {
         setAvatarUploading(false);
@@ -76,21 +76,9 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       Alert.alert('Required', 'Please enter your full name.');
       return;
     }
-    let photoUploadFailed = false;
     try {
       setLoading(true);
       const fullName = name.trim();
-      // if (avatar && !avatarUploaded) {
-      //   setAvatarUploading(true);
-      //   try {
-      //     const response = await customerService.uploadProfilePhoto(avatar);
-      //     setAvatarUrl(response.url);
-      //   } catch (error) {
-      //     photoUploadFailed = true;
-      //     throw error;
-      //   }
-      //   setAvatarUploaded(true);
-      // }
       await customerService.updateProfile({
         fullName,
         email: email.trim() || undefined,
@@ -99,12 +87,7 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       tokenManager.saveUserName(fullName);
       setProfileComplete(true);
     } catch {
-      Alert.alert(
-        'Error',
-        photoUploadFailed
-          ? 'Could not upload the profile photo or save your profile. Please try again.'
-          : 'Could not save profile. Please try again.',
-      );
+      Alert.alert('Error', 'Could not save profile. Please try again.');
     } finally {
       setAvatarUploading(false);
       setLoading(false);
