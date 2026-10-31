@@ -88,6 +88,18 @@ Body: {
 Response: CustomerProfile
 ```
 
+### Upload Customer Profile Photo
+```
+POST /api/v1/customer/profile/photo
+Content-Type: multipart/form-data
+Fields:
+  photo: image file
+Response: {
+  "success": true,
+  "message": "Profile photo uploaded successfully"
+}
+```
+
 ### Get Home Page Data
 ```
 GET /customer/home

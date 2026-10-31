@@ -11,6 +11,11 @@ interface CustomerProfileResponse {
   requestId: string;
 }
 
+interface ProfilePhotoUploadResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface CustomerHomeData {
   recentAstrologers: Array<{
     id: string;
@@ -57,6 +62,39 @@ export const customerService = {
       },
     );
     return response.data;
+  },
+
+  async uploadProfilePhoto(image: {
+    path: string;
+    mime: string;
+    filename?: string;
+  }): Promise<ProfilePhotoUploadResponse> {
+    const accessToken = tokenManager.getAccessToken();
+    if (!accessToken) {
+      throw new Error('You must be signed in to upload a profile photo.');
+    }
+
+    const formData = new FormData();
+    formData.append('photo', {
+      uri: image.path,
+      name: image.filename ?? 'profile-photo.jpg',
+      type: image.mime,
+    });
+
+    const {data} = await apiClient.post<ProfilePhotoUploadResponse>(
+      Endpoints.customer.uploadProfilePhoto,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    if (!data.success) {
+      throw new Error(data.message || 'Profile photo upload failed.');
+    }
+    return data;
   },
 
   async getHome(): Promise<CustomerHomeData> {

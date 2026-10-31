@@ -23,10 +23,15 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState<PickedImage | null>(null);
+  const [avatarUploaded, setAvatarUploaded] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const {setProfileComplete} = useAuthStore();
 
   async function chooseAvatar() {
+    if (loading || avatarUploading) {
+      return;
+    }
     try {
       const image = await ImagePicker.openPicker({
         mediaType: 'photo',
@@ -37,6 +42,19 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
         compressImageQuality: 0.8,
       });
       setAvatar(image);
+      setAvatarUploaded(false);
+      setAvatarUploading(true);
+      try {
+        await customerService.uploadProfilePhoto(image);
+        setAvatarUploaded(true);
+      } catch {
+        Alert.alert(
+          'Upload Failed',
+          'Could not upload the profile photo. It will be retried when you continue.',
+        );
+      } finally {
+        setAvatarUploading(false);
+      }
     } catch (error) {
       if (
         error &&
@@ -55,9 +73,20 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       Alert.alert('Required', 'Please enter your full name.');
       return;
     }
+    let photoUploadFailed = false;
     try {
       setLoading(true);
       const fullName = name.trim();
+      if (avatar && !avatarUploaded) {
+        setAvatarUploading(true);
+        try {
+          await customerService.uploadProfilePhoto(avatar);
+        } catch (error) {
+          photoUploadFailed = true;
+          throw error;
+        }
+        setAvatarUploaded(true);
+      }
       await customerService.updateProfile({
         fullName,
         email: email.trim() || undefined,
@@ -65,8 +94,14 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       tokenManager.saveUserName(fullName);
       setProfileComplete(true);
     } catch {
-      Alert.alert('Error', 'Could not save profile. Please try again.');
+      Alert.alert(
+        'Error',
+        photoUploadFailed
+          ? 'Could not upload the profile photo or save your profile. Please try again.'
+          : 'Could not save profile. Please try again.',
+      );
     } finally {
+      setAvatarUploading(false);
       setLoading(false);
     }
   }
@@ -88,7 +123,7 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
         <TouchableOpacity
           style={styles.avPick}
           onPress={chooseAvatar}
-          disabled={loading}
+          disabled={loading || avatarUploading}
           accessibilityRole="button"
           accessibilityLabel="Choose a profile photo">
           {avatar ? (
@@ -100,7 +135,15 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
             <Text style={{fontSize: 11}}>✏️</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.avatarHint}>Tap to choose a profile photo</Text>
+        <Text style={styles.avatarHint}>
+          {avatarUploading
+            ? 'Uploading profile photo...'
+            : avatarUploaded
+              ? 'Profile photo uploaded'
+              : avatar
+                ? 'Photo upload will retry when you continue'
+                : 'Tap to choose a profile photo'}
+        </Text>
 
         <Input
           label="FULL NAME"
@@ -119,7 +162,12 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
         />
 
         <View style={{height: 10}} />
-        <Button label="Get Started →" onPress={submit} loading={loading} />
+        <Button
+          label="Get Started →"
+          onPress={submit}
+          loading={loading}
+          disabled={avatarUploading}
+        />
       </ScrollView>
     </SafeAreaView>
   );
