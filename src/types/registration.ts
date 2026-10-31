@@ -5,6 +5,8 @@ export interface AstrologerRegistrationStep1 {
   dateOfBirth: string;
   city: string;
   state: string;
+  pincode: string;
+  country: string;
 }
 
 export interface AstrologerRegistrationStep2 {

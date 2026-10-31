@@ -1,14 +1,11 @@
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
-
-type AstrologerRegistrationData = Record<string, unknown>;
-type RegistrationDocumentFile = {
-  uri: string;
-  name: string;
-  type: string;
-};
-type RegistrationDocumentKind = string;
-type RegistrationResponse = Record<string, unknown>;
+import type {
+  AstrologerRegistrationData,
+  RegistrationDocumentFile,
+  RegistrationDocumentKind,
+  RegistrationResponse,
+} from '../types/registration';
 
 export const registrationService = {
   async uploadDocument(

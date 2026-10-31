@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import {
+  Modal,
+  Platform,
   View,
   Text,
   ScrollView,
@@ -7,11 +9,15 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from '@react-native-community/datetimepicker';
 import {pick, types, isErrorWithCode, errorCodes} from '@react-native-documents/picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import CountryPicker from '../../components/common/CountryPicker';
 import {registrationService} from '../../services/registrationService';
 import {SPECIALIZATIONS, LANGUAGES} from '../../constants';
 import type {AuthScreenProps} from '../../navigation/types';
@@ -43,6 +49,29 @@ const STEP_TITLES = [
   'Terms & Conditions',
 ];
 
+function formatDate(date: Date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month}/${date.getFullYear()}`;
+}
+
+function parseDate(value: string) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) {
+    return null;
+  }
+  const [, day, month, year] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  if (
+    date.getDate() !== Number(day) ||
+    date.getMonth() !== Number(month) - 1 ||
+    date.getFullYear() !== Number(year)
+  ) {
+    return null;
+  }
+  return date;
+}
+
 export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'AstrologerRegister'>) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -58,8 +87,12 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   const [displayName, setDisplayName] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | 'other'>('male');
   const [dob, setDob] = useState('');
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [pickerDate, setPickerDate] = useState(new Date());
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [country, setCountry] = useState('');
 
   const [experience, setExperience] = useState('');
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
@@ -85,6 +118,26 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
     setSelectedSpecs(prev =>
       prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s],
     );
+  }
+
+  function openDatePicker() {
+    const initialDate = parseDate(dob) ?? new Date();
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: initialDate,
+        mode: 'date',
+        display: 'default',
+        maximumDate: new Date(),
+        onChange: (event, selectedDate) => {
+          if (event.type === 'set' && selectedDate) {
+            setDob(formatDate(selectedDate));
+          }
+        },
+      });
+      return;
+    }
+    setPickerDate(initialDate);
+    setDatePickerVisible(true);
   }
 
   function toggleLang(l: string) {
@@ -155,6 +208,14 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
 
   async function handleNext() {
     if (step < TOTAL_STEPS) {
+      if (step === 1 && !/^\d{6}$/.test(pincode)) {
+        Alert.alert('Invalid Pincode', 'Please enter a valid 6-digit pincode.');
+        return;
+      }
+      if (step === 1 && !country) {
+        Alert.alert('Required', 'Please select your country.');
+        return;
+      }
       setStep(s => s + 1);
       return;
     }
@@ -187,6 +248,8 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         dateOfBirth: dob,
         city,
         state,
+        pincode,
+        country,
         experience: Number(experience),
         specializations: selectedSpecs,
         languages: selectedLangs,
@@ -254,9 +317,27 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
                 </TouchableOpacity>
               ))}
             </View>
-            <Input label="DATE OF BIRTH" placeholder="DD/MM/YYYY" value={dob} onChangeText={setDob} keyboardType="numeric" />
+            <Text style={styles.fieldLabel}>DATE OF BIRTH</Text>
+            <TouchableOpacity
+              style={styles.datePickerButton}
+              onPress={openDatePicker}
+              accessibilityRole="button"
+              accessibilityLabel={dob ? `Date of birth, ${dob}` : 'Select date of birth'}>
+              <Text style={[styles.datePickerText, !dob && styles.datePickerPlaceholder]}>
+                {dob || 'DD/MM/YYYY'}
+              </Text>
+            </TouchableOpacity>
             <Input label="CITY" placeholder="New Delhi" value={city} onChangeText={setCity} />
             <Input label="STATE" placeholder="Delhi" value={state} onChangeText={setState} />
+            <Input
+              label="PINCODE"
+              placeholder="110001"
+              value={pincode}
+              onChangeText={value => setPincode(value.replace(/\D/g, '').slice(0, 6))}
+              keyboardType="number-pad"
+              maxLength={6}
+            />
+            <CountryPicker value={country} onSelect={setCountry} />
           </>
         )}
 
@@ -483,6 +564,44 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         />
         <View style={{height: 40}} />
       </ScrollView>
+      {Platform.OS === 'ios' && (
+        <Modal
+          visible={datePickerVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setDatePickerVisible(false)}>
+          <View style={styles.dateModalBackdrop}>
+            <View style={styles.dateModal}>
+              <View style={styles.dateModalHeader}>
+                <TouchableOpacity
+                  onPress={() => setDatePickerVisible(false)}
+                  accessibilityRole="button">
+                  <Text style={styles.dateModalAction}>Cancel</Text>
+                </TouchableOpacity>
+                <Text style={styles.dateModalTitle}>Date of Birth</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setDob(formatDate(pickerDate));
+                    setDatePickerVisible(false);
+                  }}
+                  accessibilityRole="button">
+                  <Text style={styles.dateModalAction}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={pickerDate}
+                mode="date"
+                display="spinner"
+                locale="en-GB"
+                themeVariant="dark"
+                accentColor={Colors.gold}
+                maximumDate={new Date()}
+                onValueChange={(_, selectedDate) => setPickerDate(selectedDate)}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -508,6 +627,39 @@ const styles = StyleSheet.create({
   content: {paddingHorizontal: 20, paddingBottom: 40},
   sectionTitle: {fontSize: 20, fontWeight: '800', color: Colors.text, marginBottom: 6, marginTop: 4},
   fieldLabel: {fontSize: 11, fontWeight: '600', color: Colors.t2, marginBottom: 8, letterSpacing: 0.3},
+  datePickerButton: {
+    backgroundColor: Colors.card,
+    borderWidth: 1.5,
+    borderColor: Colors.border2,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  datePickerText: {fontSize: 16, color: Colors.text},
+  datePickerPlaceholder: {color: Colors.t3},
+  dateModalBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  dateModal: {
+    backgroundColor: Colors.bg2,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 24,
+  },
+  dateModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border3,
+  },
+  dateModalTitle: {fontSize: 16, fontWeight: '700', color: Colors.text},
+  dateModalAction: {fontSize: 15, fontWeight: '600', color: Colors.gold},
   chipRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16},
   selChip: {
     paddingVertical: 6,
