@@ -33,6 +33,7 @@ interface ProfilePhotoUploadApiResponse {
     url?: string;
     avatar?: string;
     profilePhoto?: string;
+    photoUrl?: string;
   };
 }
 
@@ -114,15 +115,11 @@ export const customerService = {
     if (response.success === false) {
       throw new Error(response.message || 'Profile photo upload failed.');
     }
-    const url =
-      response.url ??
-      response.data?.url ??
-      response.data?.avatar ??
-      response.data?.profilePhoto;
+    const url = response.data?.photoUrl;
     return {
       success: response.success ?? true,
       message: response.message,
-      url: typeof url === 'string' && url.trim() ? url : undefined,
+      url: url,
     };
   },
 

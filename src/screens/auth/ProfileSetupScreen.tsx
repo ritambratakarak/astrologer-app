@@ -90,18 +90,32 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       Alert.alert('Required', 'Please enter your full name.');
       return;
     }
+    console.log('Submitting profile update with:', {name, email, avatarUrl});
     try {
       setLoading(true);
       const fullName = name.trim();
-      await customerService.updateProfile({
+      const updateResponse = await customerService.updateProfile({
         fullName,
         email: email.trim() || undefined,
-        profilePhoto: avatarUrl || undefined,
+        profilePhoto: avatarUrl ? avatarUrl : '', // Provide an empty string if avatarUrl is null
       });
       tokenManager.saveUserName(fullName);
       setProfileComplete(true);
-    } catch {
-      Alert.alert('Error', 'Could not save profile. Please try again.');
+      console.log('Profile updated response', updateResponse);
+    } catch (error) {
+      const responseMessage = axios.isAxiosError<{message?: unknown}>(error)
+        ? error.response?.data?.message
+        : undefined;
+      const message = typeof responseMessage === 'string'
+        ? responseMessage
+        : error instanceof Error
+          ? error.message
+          : 'An unknown error occurred while updating the profile.';
+      console.error('Profile update failed.', {
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        message,
+      });
+      Alert.alert('Error', message);
     } finally {
       setAvatarUploading(false);
       setLoading(false);
@@ -130,7 +144,7 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
           accessibilityLabel="Choose a profile photo">
           {avatar ? (
             <Image
-              source={{uri: avatarUploaded && avatarUrl ? avatarUrl : avatar.path}}
+              source={{uri: avatarUploaded && "http://98.88.19.190:8000" + avatarUrl ? "http://98.88.19.190:8000" + avatarUrl : avatar.path}}
               style={styles.avatarImage}
             />
           ) : (
