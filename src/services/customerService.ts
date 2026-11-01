@@ -26,12 +26,13 @@ interface ProfilePhotoUploadResponse {
 }
 
 interface ProfilePhotoUploadApiResponse {
-  success: boolean;
+  success?: boolean;
   message?: string;
   url?: string;
   data?: {
     url?: string;
     avatar?: string;
+    profilePhoto?: string;
   };
 }
 
@@ -106,20 +107,22 @@ export const customerService = {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'multipart/form-data',
         },
       },
     );
-    if (!response.success) {
+    if (response.success === false) {
       throw new Error(response.message || 'Profile photo upload failed.');
     }
-    const url = response.url ?? response.data?.url ?? response.data?.avatar;
-    if (typeof url !== 'string' || !url.trim()) {
-      throw new Error('Profile photo upload response did not include a URL.');
-    }
+    const url =
+      response.url ??
+      response.data?.url ??
+      response.data?.avatar ??
+      response.data?.profilePhoto;
     return {
-      success: response.success,
+      success: response.success ?? true,
       message: response.message,
-      url,
+      url: typeof url === 'string' && url.trim() ? url : undefined,
     };
   },
 

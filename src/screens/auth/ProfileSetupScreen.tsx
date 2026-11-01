@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import axios from 'axios';
 import ImagePicker, {type Image as PickedImage} from 'react-native-image-crop-picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
@@ -48,12 +49,25 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       setAvatarUploading(true);
       try {
         const response = await customerService.uploadProfilePhoto(image);
+        console.log('Profile photo uploaded:', response);
         setAvatarUrl(response.url ?? null);
         setAvatarUploaded(true);
-      } catch {
+      } catch (error) {
+        const responseMessage = axios.isAxiosError<{message?: unknown}>(error)
+          ? error.response?.data?.message
+          : undefined;
+        const message = typeof responseMessage === 'string'
+          ? responseMessage
+          : error instanceof Error
+            ? error.message
+            : 'Could not upload the profile photo. Select the photo again to retry.';
+        console.error('Profile photo upload failed.', {
+          status: axios.isAxiosError(error) ? error.response?.status : undefined,
+          message,
+        });
         Alert.alert(
           'Upload Failed',
-          'Could not upload the profile photo. Select the photo again to retry.',
+          message,
         );
       } finally {
         setAvatarUploading(false);
