@@ -60,7 +60,7 @@ export default function CustomerProfileScreen() {
     }, []),
   );
 
-  async function changeProfilePhoto() {
+  const changeProfilePhoto = async () => {
     if (photoUploading) {
       return;
     }
@@ -131,7 +131,7 @@ export default function CustomerProfileScreen() {
           <View style={styles.avWrap}>
             <TouchableOpacity
               style={styles.av}
-              onPress={changeProfilePhoto}
+              onPress={() => changeProfilePhoto()}
               disabled={photoUploading}
               accessibilityRole="button"
               accessibilityLabel={photoUploading ? 'Uploading profile photo' : 'Change profile photo'}>
