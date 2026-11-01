@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,24 @@ export default function CustomerProfileScreen() {
   const phone = tokenManager.getUserPhone();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeout.current) {
+        clearTimeout(toastTimeout.current);
+      }
+    };
+  }, []);
+
+  const showToast = (message: string) => {
+    if (toastTimeout.current) {
+      clearTimeout(toastTimeout.current);
+    }
+    setToastMessage(message);
+    toastTimeout.current = setTimeout(() => setToastMessage(''), 3000);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -102,10 +120,9 @@ export default function CustomerProfileScreen() {
       }
       setAvatarUri(profilePhoto);
     } catch {
-      Alert.alert(
-        uploaded ? 'Photo Uploaded' : 'Upload Failed',
+      showToast(
         uploaded
-          ? 'Your photo was uploaded, but the profile image could not be updated.'
+          ? 'Photo uploaded, but the profile image could not be updated.'
           : 'Could not upload the profile photo. Please try again.',
       );
       if (!uploaded) {
@@ -201,6 +218,11 @@ export default function CustomerProfileScreen() {
 
         <View style={{height: 90}} />
       </ScrollView>
+      {toastMessage ? (
+        <View style={styles.toast} accessibilityRole="alert">
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -226,4 +248,6 @@ const styles = StyleSheet.create({
   menuLabel: {flex: 1, fontSize: 14, fontWeight: '600', color: Colors.text},
   menuSub: {fontSize: 12, color: Colors.gold, fontWeight: '600', marginRight: 8},
   menuArrow: {fontSize: 14, color: Colors.t3},
+  toast: {position: 'absolute', bottom: 24, left: 20, right: 20, padding: 14, borderRadius: 12, backgroundColor: Colors.card2, borderWidth: 1, borderColor: Colors.border},
+  toastText: {fontSize: 13, color: Colors.text, textAlign: 'center'},
 });
