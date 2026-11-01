@@ -8,25 +8,113 @@ import {API_BASE_URL} from '../constants';
 import {tokenManager} from '../security/tokenManager';
 import {csrfTokenManager} from '../security/csrfTokenManager';
 import {Endpoints} from './endpoints';
-import type {RefreshTokenResponse} from '../types/auth';
+import type {RefreshTokenApiResponse} from '../types/auth';
 
-// Queue of failed requests waiting for token refresh
-type QueueItem = {
-  resolve: (value: string) => void;
-  reject: (reason: unknown) => void;
-};
-let refreshQueue: QueueItem[] = [];
-let isRefreshing = false;
+const TOKEN_EXPIRY_BUFFER_MS = 30_000;
+let refreshPromise: Promise<string> | null = null;
 
-function processQueue(error: unknown, token: string | null): void {
-  refreshQueue.forEach(item => {
-    if (error) {
-      item.reject(error);
-    } else if (token) {
-      item.resolve(token);
+function decodeBase64Url(value: string): string {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  let decoded = '';
+  let buffer = 0;
+  let bits = 0;
+
+  for (const character of base64) {
+    if (character === '=') {
+      break;
     }
+
+    const digit = alphabet.indexOf(character);
+    if (digit < 0) {
+      throw new Error('Invalid JWT payload encoding.');
+    }
+
+    buffer = buffer * 64 + digit;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      const remainingBitValue = 2 ** bits;
+      decoded += String.fromCharCode(Math.floor(buffer / remainingBitValue) % 256);
+      buffer %= remainingBitValue;
+    }
+  }
+
+  return decoded;
+}
+
+function isAccessTokenExpired(token: string): boolean {
+  const payload = token.split('.')[1];
+  if (!payload) {
+    return false;
+  }
+
+  try {
+    const claims = JSON.parse(decodeBase64Url(payload)) as {exp?: unknown};
+    return (
+      typeof claims.exp === 'number' &&
+      claims.exp * 1000 <= Date.now() + TOKEN_EXPIRY_BUFFER_MS
+    );
+  } catch (error) {
+    console.warn('Could not inspect access token expiry; relying on the API response.', error);
+    return false;
+  }
+}
+
+async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  const refreshToken = tokenManager.getRefreshToken();
+  if (!refreshToken) {
+    throw new Error('No refresh token is available.');
+  }
+
+  refreshPromise = (async () => {
+    let csrfToken: string | undefined;
+    try {
+      csrfToken = await csrfTokenManager.getOrFetchCsrfToken();
+    } catch (error) {
+      console.warn('Failed to attach CSRF token to refresh request:', error);
+    }
+
+    try {
+      const {data: apiResponse} = await axios.post<RefreshTokenApiResponse>(
+        `${API_BASE_URL}${Endpoints.auth.refreshToken}`,
+        {refreshToken},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...(csrfToken ? {'x-csrf-token': csrfToken} : {}),
+          },
+        },
+      );
+
+      const responseData = apiResponse.data;
+      const accessToken =
+        responseData.accessToken ?? responseData.tokens?.accessToken;
+      const nextRefreshToken =
+        responseData.refreshToken ?? responseData.tokens?.refreshToken;
+      if (typeof accessToken !== 'string' || !accessToken) {
+        throw new Error('Token refresh succeeded, but the access token was missing.');
+      }
+
+      tokenManager.updateAccessToken(accessToken);
+      if (nextRefreshToken) {
+        tokenManager.updateRefreshToken(nextRefreshToken);
+      }
+      return accessToken;
+    } catch (error) {
+      tokenManager.clearAll();
+      throw error;
+    }
+  })().finally(() => {
+    refreshPromise = null;
   });
-  refreshQueue = [];
+
+  return refreshPromise;
 }
 
 export const apiClient: AxiosInstance = axios.create({
@@ -41,7 +129,11 @@ export const apiClient: AxiosInstance = axios.create({
 // Attach Bearer token and CSRF token to every request
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const token = tokenManager.getAccessToken();
+    let token = tokenManager.getAccessToken();
+    if (token && isAccessTokenExpired(token) && tokenManager.getRefreshToken()) {
+      token = await refreshAccessToken();
+    }
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -60,15 +152,20 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error),
 );
 
-// Handle 401 → refresh token → retry once
+// Handle unexpected 401 responses by refreshing and retrying once.
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
+    const originalRequest = error.config as
+      | (InternalAxiosRequestConfig & {_retry?: boolean})
+      | undefined;
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      error.response?.status !== 401 ||
+      !originalRequest ||
+      originalRequest._retry ||
+      !originalRequest.headers.Authorization
+    ) {
       return Promise.reject(error);
     }
 
@@ -78,42 +175,14 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
-        refreshQueue.push({resolve, reject});
-      }).then(newToken => {
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return apiClient(originalRequest);
-      });
-    }
-
     originalRequest._retry = true;
-    isRefreshing = true;
 
     try {
-      const refreshToken = tokenManager.getRefreshToken();
-      if (!refreshToken) {
-        throw new Error('No refresh token');
-      }
-
-      const {data} = await axios.post<RefreshTokenResponse>(
-        `${API_BASE_URL}${Endpoints.auth.refreshToken}`,
-        {refreshToken},
-        {headers: {'Content-Type': 'application/json'}},
-      );
-
-      tokenManager.updateAccessToken(data.accessToken);
-      processQueue(null, data.accessToken);
-
-      originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+      const accessToken = await refreshAccessToken();
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
-      processQueue(refreshError, null);
-      tokenManager.clearAll();
-      // Signal auth store to logout — screens listen to store
       return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
   },
 );

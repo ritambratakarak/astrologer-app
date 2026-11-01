@@ -65,9 +65,18 @@ Response: (clears local tokens)
 
 ### Refresh Token
 ```
-POST /auth/refresh-token
+POST /auth/refresh
 Body: { "refreshToken": "..." }
-Response: { "accessToken": "..." }
+Response: {
+  "status": 200,
+  "success": true,
+  "data": {
+    "accessToken": "...",
+    "refreshToken": "..."
+  },
+  "message": "...",
+  "requestId": "..."
+}
 ```
 
 ## Customer Endpoints

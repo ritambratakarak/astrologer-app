@@ -3,7 +3,7 @@ export const Endpoints = {
   auth: {
     sendOtp: '/auth/send-otp',
     verifyOtp: '/auth/verify-otp',
-    refreshToken: '/auth/refresh-token',
+    refreshToken: '/auth/refresh',
     logout: '/auth/logout',
   },
 

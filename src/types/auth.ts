@@ -29,8 +29,16 @@ export interface AuthResponse {
   };
 }
 
-export interface RefreshTokenResponse {
-  accessToken: string;
+export interface RefreshTokenApiResponse {
+  status: number;
+  success: boolean;
+  data: {
+    accessToken?: string;
+    refreshToken?: string;
+    tokens?: AuthTokens;
+  };
+  message: string;
+  requestId: string;
 }
 
 export interface SendOtpResponse {

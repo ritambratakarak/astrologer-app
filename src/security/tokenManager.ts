@@ -64,6 +64,10 @@ export const tokenManager = {
     secureStorage.set(TOKEN_KEYS.ACCESS, accessToken);
   },
 
+  updateRefreshToken(refreshToken: string): void {
+    secureStorage.set(TOKEN_KEYS.REFRESH, refreshToken);
+  },
+
   clearAll(): void {
     secureStorage.remove(TOKEN_KEYS.ACCESS);
     secureStorage.remove(TOKEN_KEYS.REFRESH);
