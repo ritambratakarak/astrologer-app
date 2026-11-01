@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,31 +8,31 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import ImagePicker, {type Image as PickedImage} from 'react-native-image-crop-picker';
-import {Colors} from '../../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import ImagePicker, { type Image as PickedImage } from 'react-native-image-crop-picker';
+import { Colors } from '../../theme/colors';
 import Chip from '../../components/common/Chip';
-import {customerService} from '../../services/customerService';
-import {useAuthStore} from '../../store/authStore';
-import {tokenManager} from '../../security/tokenManager';
-import type {CustomerStackParamList} from '../../navigation/types';
+import { customerService } from '../../services/customerService';
+import { useAuthStore } from '../../store/authStore';
+import { tokenManager } from '../../security/tokenManager';
+import type { CustomerStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
 
 const MENU = [
-  {icon: '💰', label: 'Wallet & Payments', sub: '₹250', screen: 'WalletTab'},
-  {icon: '📋', label: 'Transaction History', screen: 'Transactions'},
-  {icon: '🔔', label: 'Notifications', screen: 'Notifications'},
-  {icon: '🔒', label: 'Privacy & Security', screen: null},
-  {icon: '❓', label: 'Help & Support', screen: null},
-  {icon: '⭐', label: 'Rate the App', screen: null},
+  { icon: '💰', label: 'Wallet & Payments', sub: '₹250', screen: 'WalletTab' },
+  { icon: '📋', label: 'Transaction History', screen: 'Transactions' },
+  { icon: '🔔', label: 'Notifications', screen: 'Notifications' },
+  { icon: '🔒', label: 'Privacy & Security', screen: null },
+  { icon: '❓', label: 'Help & Support', screen: null },
+  { icon: '⭐', label: 'Rate the App', screen: null },
 ];
 
 export default function CustomerProfileScreen() {
   const navigation = useNavigation<Nav>();
-  const {logout} = useAuthStore();
+  const { logout } = useAuthStore();
   const name = tokenManager.getUserName();
   const phone = tokenManager.getUserPhone();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -112,19 +112,16 @@ export default function CustomerProfileScreen() {
     try {
       const response = await customerService.updateProfilePhoto(image);
       uploaded = true;
-      await customerService.updateProfile({profilePhoto: response.data?.profilePhoto});
+      await customerService.updateProfile({ profilePhoto: response.data?.profilePhoto });
       const profile = await customerService.getProfile();
       const profilePhoto = profile.profilePhoto;
       if (!profilePhoto) {
         throw new Error('Profile response did not include the uploaded photo URL.');
       }
       setAvatarUri("http://98.88.19.190:8000" + profilePhoto);
+      showToast('Photo uploaded, but the profile image could not be updated.');
     } catch {
-      showToast(
-        uploaded
-          ? 'Photo uploaded, but the profile image could not be updated.'
-          : 'Could not upload the profile photo. Please try again.',
-      );
+      showToast('Could not upload the profile photo. Please try again.');
       if (!uploaded) {
         setAvatarUri(previousAvatarUri);
       }
@@ -135,8 +132,8 @@ export default function CustomerProfileScreen() {
 
   function handleLogout() {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
-      {text: 'Cancel', style: 'cancel'},
-      {text: 'Log Out', style: 'destructive', onPress: () => logout()},
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Log Out', style: 'destructive', onPress: () => logout() },
     ]);
   }
 
@@ -153,12 +150,12 @@ export default function CustomerProfileScreen() {
               accessibilityRole="button"
               accessibilityLabel={photoUploading ? 'Uploading profile photo' : 'Change profile photo'}>
               {avatarUri ? (
-                <Image source={{uri: avatarUri}} style={styles.avatarImage} />
+                <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
               ) : (
-                <Text style={{fontSize: 36}}>👤</Text>
+                <Text style={{ fontSize: 36 }}>👤</Text>
               )}
             </TouchableOpacity>
-            <View style={styles.editBadge}><Text style={{fontSize: 12}}>✏️</Text></View>
+            <View style={styles.editBadge}><Text style={{ fontSize: 12 }}>✏️</Text></View>
           </View>
           <Text style={styles.avatarHint}>
             {photoUploading ? 'Uploading photo...' : 'Tap your photo to change it'}
@@ -180,7 +177,7 @@ export default function CustomerProfileScreen() {
             <Text style={styles.statLabel}>Sessions</Text>
           </View>
           <View style={[styles.stat, styles.statBorder]}>
-            <Text style={[styles.statVal, {color: Colors.gold}]}>₹250</Text>
+            <Text style={[styles.statVal, { color: Colors.gold }]}>₹250</Text>
             <Text style={styles.statLabel}>Balance</Text>
           </View>
           <View style={styles.stat}>
@@ -201,7 +198,7 @@ export default function CustomerProfileScreen() {
                 navigation.navigate('Notifications');
               }
             }}>
-            <View style={styles.menuIcon}><Text style={{fontSize: 16}}>{item.icon}</Text></View>
+            <View style={styles.menuIcon}><Text style={{ fontSize: 16 }}>{item.icon}</Text></View>
             <Text style={styles.menuLabel}>{item.label}</Text>
             {item.sub && <Text style={styles.menuSub}>{item.sub}</Text>}
             <Text style={styles.menuArrow}>›</Text>
@@ -209,14 +206,14 @@ export default function CustomerProfileScreen() {
         ))}
 
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-          <View style={[styles.menuIcon, {backgroundColor: Colors.redDim}]}>
-            <Text style={{fontSize: 16}}>🚪</Text>
+          <View style={[styles.menuIcon, { backgroundColor: Colors.redDim }]}>
+            <Text style={{ fontSize: 16 }}>🚪</Text>
           </View>
-          <Text style={[styles.menuLabel, {color: Colors.red}]}>Log Out</Text>
-          <Text style={[styles.menuArrow, {color: Colors.red}]}>›</Text>
+          <Text style={[styles.menuLabel, { color: Colors.red }]}>Log Out</Text>
+          <Text style={[styles.menuArrow, { color: Colors.red }]}>›</Text>
         </TouchableOpacity>
 
-        <View style={{height: 90}} />
+        <View style={{ height: 90 }} />
       </ScrollView>
       {toastMessage ? (
         <View style={styles.toast} accessibilityRole="alert">
@@ -228,26 +225,26 @@ export default function CustomerProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {flex: 1, backgroundColor: Colors.bg},
-  hero: {padding: 20, alignItems: 'center', backgroundColor: 'rgba(30,18,96,0.4)'},
-  avWrap: {position: 'relative', marginBottom: 14},
-  av: {width: 90, height: 90, borderRadius: 45, backgroundColor: Colors.card2, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.border},
-  avatarImage: {width: 86, height: 86, borderRadius: 43},
-  editBadge: {position: 'absolute', bottom: 0, right: 0, backgroundColor: Colors.gold, borderRadius: 13, width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.bg},
-  avatarHint: {fontSize: 11, color: Colors.t2, marginTop: -8, marginBottom: 8},
-  name: {fontSize: 22, fontWeight: '800', color: Colors.text},
-  phone: {fontSize: 13, color: Colors.t2, marginTop: 4},
-  chips: {flexDirection: 'row', gap: 8, marginTop: 8},
-  statsRow: {flexDirection: 'row', padding: 14, marginHorizontal: 20, marginBottom: 12, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: 16},
-  stat: {flex: 1, alignItems: 'center'},
-  statBorder: {borderLeftWidth: 1, borderRightWidth: 1, borderColor: Colors.border2},
-  statVal: {fontSize: 20, fontWeight: '800', color: Colors.text},
-  statLabel: {fontSize: 10, color: Colors.t2},
-  menuItem: {flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: Colors.border3},
-  menuIcon: {width: 36, height: 36, borderRadius: 12, backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center'},
-  menuLabel: {flex: 1, fontSize: 14, fontWeight: '600', color: Colors.text},
-  menuSub: {fontSize: 12, color: Colors.gold, fontWeight: '600', marginRight: 8},
-  menuArrow: {fontSize: 14, color: Colors.t3},
-  toast: {position: 'absolute', bottom: 24, left: 20, right: 20, padding: 14, borderRadius: 12, backgroundColor: Colors.card2, borderWidth: 1, borderColor: Colors.border},
-  toastText: {fontSize: 13, color: Colors.text, textAlign: 'center'},
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  hero: { padding: 20, alignItems: 'center', backgroundColor: 'rgba(30,18,96,0.4)' },
+  avWrap: { position: 'relative', marginBottom: 14 },
+  av: { width: 90, height: 90, borderRadius: 45, backgroundColor: Colors.card2, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.border },
+  avatarImage: { width: 86, height: 86, borderRadius: 43 },
+  editBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: Colors.gold, borderRadius: 13, width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.bg },
+  avatarHint: { fontSize: 11, color: Colors.t2, marginTop: -8, marginBottom: 8 },
+  name: { fontSize: 22, fontWeight: '800', color: Colors.text },
+  phone: { fontSize: 13, color: Colors.t2, marginTop: 4 },
+  chips: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  statsRow: { flexDirection: 'row', padding: 14, marginHorizontal: 20, marginBottom: 12, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border, borderRadius: 16 },
+  stat: { flex: 1, alignItems: 'center' },
+  statBorder: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: Colors.border2 },
+  statVal: { fontSize: 20, fontWeight: '800', color: Colors.text },
+  statLabel: { fontSize: 10, color: Colors.t2 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: Colors.border3 },
+  menuIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center' },
+  menuLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.text },
+  menuSub: { fontSize: 12, color: Colors.gold, fontWeight: '600', marginRight: 8 },
+  menuArrow: { fontSize: 14, color: Colors.t3 },
+  toast: { position: 'absolute', bottom: 24, left: 20, right: 20, padding: 14, borderRadius: 12, backgroundColor: Colors.card2, borderWidth: 1, borderColor: Colors.border },
+  toastText: { fontSize: 13, color: Colors.text, textAlign: 'center' },
 });
