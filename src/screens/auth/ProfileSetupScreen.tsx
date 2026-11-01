@@ -48,7 +48,7 @@ export default function ProfileSetupScreen({navigation}: AuthScreenProps<'Profil
       setAvatarUploading(true);
       try {
         const response = await customerService.uploadProfilePhoto(image);
-        setAvatarUrl(response.url);
+        setAvatarUrl(response.url ?? null);
         setAvatarUploaded(true);
       } catch {
         Alert.alert(

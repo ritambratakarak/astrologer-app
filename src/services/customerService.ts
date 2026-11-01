@@ -3,7 +3,10 @@ import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import {API_BASE_URL} from '../constants';
 import {tokenManager} from '../security/tokenManager';
-import type {CustomerProfile, ProfileSetupRequest} from '../types/user';
+import type {
+  CustomerProfile,
+  ProfileUpdateRequest,
+} from '../types/user';
 
 interface CustomerProfileResponse {
   status: number;
@@ -16,7 +19,7 @@ interface CustomerProfileResponse {
 interface ProfilePhotoUploadResponse {
   success: boolean;
   message?: string;
-  url: string;
+  url?: string;
 }
 
 interface ProfilePhotoUploadApiResponse {
@@ -63,7 +66,7 @@ export const customerService = {
     return response.data;
   },
 
-  async updateProfile(payload: ProfileSetupRequest): Promise<CustomerProfile> {
+  async updateProfile(payload: ProfileUpdateRequest): Promise<CustomerProfile> {
     const accessToken = tokenManager.getAccessToken();
     const {data: response} = await apiClient.patch<CustomerProfileResponse>(
       Endpoints.customer.updateProfile,
@@ -121,7 +124,7 @@ export const customerService = {
     path: string;
     mime: string;
     filename?: string;
-  }): Promise<void> {
+  }): Promise<ProfilePhotoUploadResponse> {
     const accessToken = tokenManager.getAccessToken();
     if (!accessToken) {
       throw new Error('You must be signed in to update your profile photo.');
@@ -151,6 +154,10 @@ export const customerService = {
     if (response.success === false) {
       throw new Error(response.message || 'Profile photo update failed.');
     }
+    return {
+      success: true,
+      message: response.message,
+    };
   },
 
   async getHome(): Promise<CustomerHomeData> {

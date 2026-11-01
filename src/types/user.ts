@@ -36,3 +36,9 @@ export interface ProfileSetupRequest {
   email?: string;
   profilePhoto?: string;
 }
+
+export interface ProfileUpdateRequest {
+  fullName?: string;
+  email?: string;
+  profilePhoto?: string;
+}

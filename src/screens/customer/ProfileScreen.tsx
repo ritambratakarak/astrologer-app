@@ -92,15 +92,20 @@ export default function CustomerProfileScreen() {
     setPhotoUploading(true);
     let uploaded = false;
     try {
-      await customerService.updateProfilePhoto(image);
+      const response = await customerService.updateProfilePhoto(image);
       uploaded = true;
+      await customerService.updateProfile({profilePhoto: response.url});
       const profile = await customerService.getProfile();
-      setAvatarUri(profile.profilePhoto || image.path);
+      const profilePhoto = profile.profilePhoto;
+      if (!profilePhoto) {
+        throw new Error('Profile response did not include the uploaded photo URL.');
+      }
+      setAvatarUri(profilePhoto);
     } catch {
       Alert.alert(
         uploaded ? 'Photo Uploaded' : 'Upload Failed',
         uploaded
-          ? 'Your photo was uploaded, but the latest profile image could not be loaded.'
+          ? 'Your photo was uploaded, but the profile image could not be updated.'
           : 'Could not upload the profile photo. Please try again.',
       );
       if (!uploaded) {
