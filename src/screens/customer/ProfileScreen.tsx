@@ -113,12 +113,12 @@ export default function CustomerProfileScreen() {
       const response = await customerService.updateProfilePhoto(image);
       uploaded = true;
       await customerService.updateProfile({profilePhoto: response.data?.profilePhoto});
-      // const profile = await customerService.getProfile();
-      // const profilePhoto = profile.profilePhoto;
-      // if (!profilePhoto) {
-      //   throw new Error('Profile response did not include the uploaded photo URL.');
-      // }
-      setAvatarUri(profilePhoto);
+      const profile = await customerService.getProfile();
+      const profilePhoto = profile.profilePhoto;
+      if (!profilePhoto) {
+        throw new Error('Profile response did not include the uploaded photo URL.');
+      }
+      setAvatarUri("http://98.88.19.190:8000" + profilePhoto);
     } catch {
       showToast(
         uploaded
