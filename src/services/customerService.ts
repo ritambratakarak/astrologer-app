@@ -20,6 +20,9 @@ interface ProfilePhotoUploadResponse {
   success: boolean;
   message?: string;
   url?: string;
+  data?: {
+    profilePhoto?: string;
+  };
 }
 
 interface ProfilePhotoUploadApiResponse {
@@ -139,6 +142,9 @@ export const customerService = {
 
     const {data: response} = await axios.patch<{
       success?: boolean;
+      data?: {
+        profilePhoto?: string;
+      };
       message?: string;
     }>(
       `${API_BASE_URL}${Endpoints.customer.updateProfilePhoto}`,
@@ -156,6 +162,9 @@ export const customerService = {
     }
     return {
       success: true,
+      data: {
+        profilePhoto: response.data?.profilePhoto,
+      },
       message: response.message,
     };
   },

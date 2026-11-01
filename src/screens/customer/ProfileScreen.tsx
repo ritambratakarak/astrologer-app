@@ -94,7 +94,7 @@ export default function CustomerProfileScreen() {
     try {
       const response = await customerService.updateProfilePhoto(image);
       uploaded = true;
-      await customerService.updateProfile({profilePhoto: response.url});
+      await customerService.updateProfile({profilePhoto: response.data?.profilePhoto});
       const profile = await customerService.getProfile();
       const profilePhoto = profile.profilePhoto;
       if (!profilePhoto) {
