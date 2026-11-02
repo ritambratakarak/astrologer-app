@@ -1,60 +1,41 @@
-export interface AstrologerRegistrationStep1 {
+export interface AstrologerKycRegistrationData {
   fullName: string;
   displayName: string;
+  dob: string;
   gender: 'male' | 'female' | 'other';
-  dateOfBirth: string;
-  city: string;
-  state: string;
-  pincode: string;
-  country: string;
-}
-
-export interface AstrologerRegistrationStep2 {
   experience: number;
+  address: {
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
+  };
   specializations: string[];
   languages: string[];
-  bio: string;
-}
-
-export interface AstrologerRegistrationStep3 {
   chatRate: number;
-  callRate: number;
-  videoRate: number;
-}
-
-export interface AstrologerRegistrationStep4 {
-  aadhaarNumber: string;
-  panNumber: string;
-}
-
-export interface AstrologerRegistrationStep5 {
-  bankAccountNumber: string;
-  ifscCode: string;
-  accountHolderName: string;
-  bankName: string;
-}
-
-export interface AstrologerRegistrationStep6 {
-  certificates: string[];
-  profilePhoto: string;
-}
-
-export interface AstrologerRegistrationData
-  extends AstrologerRegistrationStep1,
-    AstrologerRegistrationStep2,
-    AstrologerRegistrationStep3,
-    AstrologerRegistrationStep4,
-    AstrologerRegistrationStep5,
-    AstrologerRegistrationStep6 {
-  termsAccepted: boolean;
-  agreementAccepted: boolean;
+  voiceCallRate: number;
+  videoCallRate: number;
+  panCard: {
+    number: string;
+    photoUrl: string;
+  };
+  aadharCard: {
+    number: string;
+    photoUrl: string;
+  };
+  profilePhotoUrl: string;
+  bankDetails: {
+    accountHolderName: string;
+    accountNumber: string;
+    bankName: string;
+    ifscCode: string;
+  };
 }
 
 export type RegistrationDocumentKind =
   | 'profilePhoto'
-  | 'certificate'
-  | 'aadhaarFront'
-  | 'aadhaarBack';
+  | 'panCard'
+  | 'aadhaarCard';
 
 export interface RegistrationDocumentFile {
   uri: string;

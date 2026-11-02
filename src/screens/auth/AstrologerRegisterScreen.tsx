@@ -22,18 +22,17 @@ import {registrationService} from '../../services/registrationService';
 import {SPECIALIZATIONS, LANGUAGES} from '../../constants';
 import type {AuthScreenProps} from '../../navigation/types';
 import type {
-  AstrologerRegistrationData,
+  AstrologerKycRegistrationData,
   RegistrationDocumentFile,
   RegistrationDocumentKind,
 } from '../../types/registration';
 
-type DocumentSlot = 'profilePhoto' | 'aadhaarFront' | 'aadhaarBack';
+type DocumentSlot = 'profilePhoto' | 'panCard' | 'aadhaarCard';
 
 type RegistrationDocuments = {
   profilePhoto: RegistrationDocumentFile | null;
-  certificates: RegistrationDocumentFile[];
-  aadhaarFront: RegistrationDocumentFile | null;
-  aadhaarBack: RegistrationDocumentFile | null;
+  panCard: RegistrationDocumentFile | null;
+  aadhaarCard: RegistrationDocumentFile | null;
 };
 
 const TOTAL_STEPS = 8;
@@ -77,9 +76,8 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   const [loading, setLoading] = useState(false);
   const [documents, setDocuments] = useState<RegistrationDocuments>({
     profilePhoto: null,
-    certificates: [],
-    aadhaarFront: null,
-    aadhaarBack: null,
+    panCard: null,
+    aadhaarCard: null,
   });
 
   // Form state
@@ -100,8 +98,8 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   const [bio, setBio] = useState('');
 
   const [chatRate, setChatRate] = useState('20');
-  const [callRate, setCallRate] = useState('30');
-  const [videoRate, setVideoRate] = useState('40');
+  const [callRate, setCallRate] = useState('20');
+  const [videoRate, setVideoRate] = useState('20');
 
   const [aadhaar, setAadhaar] = useState('');
   const [pan, setPan] = useState('');
@@ -146,11 +144,10 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
     );
   }
 
-  async function chooseDocuments(target: DocumentSlot | 'certificates') {
+  async function chooseDocuments(target: DocumentSlot) {
     try {
       const selectedFiles = await pick({
         type: target === 'profilePhoto' ? [types.images] : [types.images, types.pdf],
-        allowMultiSelection: target === 'certificates',
       });
       const files: RegistrationDocumentFile[] = selectedFiles.map((file, index) => ({
         uri: file.uri,
@@ -158,14 +155,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         type: file.type ?? 'application/octet-stream',
       }));
 
-      if (target === 'certificates') {
-        setDocuments(current => ({
-          ...current,
-          certificates: [...current.certificates, ...files],
-        }));
-      } else {
-        setDocuments(current => ({...current, [target]: files[0]}));
-      }
+      setDocuments(current => ({...current, [target]: files[0]}));
     } catch (error) {
       if (isErrorWithCode(error) && error.code === errorCodes.OPERATION_CANCELED) {
         return;
@@ -180,17 +170,14 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         current.profilePhoto?.uri === uri
           ? {...current.profilePhoto, uploadedUrl}
           : current.profilePhoto,
-      certificates: current.certificates.map(file =>
-        file.uri === uri ? {...file, uploadedUrl} : file,
-      ),
-      aadhaarFront:
-        current.aadhaarFront?.uri === uri
-          ? {...current.aadhaarFront, uploadedUrl}
-          : current.aadhaarFront,
-      aadhaarBack:
-        current.aadhaarBack?.uri === uri
-          ? {...current.aadhaarBack, uploadedUrl}
-          : current.aadhaarBack,
+      panCard:
+        current.panCard?.uri === uri
+          ? {...current.panCard, uploadedUrl}
+          : current.panCard,
+      aadhaarCard:
+        current.aadhaarCard?.uri === uri
+          ? {...current.aadhaarCard, uploadedUrl}
+          : current.aadhaarCard,
     }));
   }
 
@@ -207,6 +194,42 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   }
 
   async function handleNext() {
+    if (step === 7 && !agreementAccepted) {
+      Alert.alert('Required', 'Please accept the Astrologer Agreement to continue.');
+      return;
+    }
+
+    if (step === 8 && !termsAccepted) {
+      Alert.alert('Required', 'Please accept the Terms & Conditions to submit.');
+      return;
+    }
+
+    if (step === 6) {
+      const {profilePhoto, panCard, aadhaarCard} = documents;
+      if (!profilePhoto || !panCard || !aadhaarCard) {
+        Alert.alert(
+          'Required',
+          'Please select a profile photo, PAN card, and Aadhaar card.',
+        );
+        return;
+      }
+
+      try {
+        setLoading(true);
+        await Promise.all([
+          uploadDocument(profilePhoto, 'profilePhoto'),
+          uploadDocument(panCard, 'panCard'),
+          uploadDocument(aadhaarCard, 'aadhaarCard'),
+        ]);
+        setStep(7);
+      } catch {
+        Alert.alert('Error', 'Could not upload documents. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (step < TOTAL_STEPS) {
       if (step === 1 && !/^\d{6}$/.test(pincode)) {
         Alert.alert('Invalid Pincode', 'Please enter a valid 6-digit pincode.');
@@ -219,59 +242,40 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
       setStep(s => s + 1);
       return;
     }
-    if (!agreementAccepted || !termsAccepted) {
-      Alert.alert('Required', 'Please accept the Agreement and Terms before submitting.');
+    const {profilePhoto, panCard, aadhaarCard} = documents;
+    if (!profilePhoto?.uploadedUrl || !panCard?.uploadedUrl || !aadhaarCard?.uploadedUrl) {
+      Alert.alert('Required', 'Please upload all required documents before submitting.');
       return;
     }
-    const {profilePhoto, certificates, aadhaarFront, aadhaarBack} = documents;
-    if (!profilePhoto || certificates.length === 0 || !aadhaarFront || !aadhaarBack) {
-      Alert.alert(
-        'Required',
-        'Please select a profile photo, at least one certificate, and both sides of your Aadhaar card.',
-      );
-      return;
-    }
+
     try {
       setLoading(true);
-      const profilePhotoUrl = await uploadDocument(profilePhoto, 'profilePhoto');
-      const certificateUrls: string[] = [];
-      for (const certificate of certificates) {
-        certificateUrls.push(await uploadDocument(certificate, 'certificate'));
-      }
-      await uploadDocument(aadhaarFront, 'aadhaarFront');
-      await uploadDocument(aadhaarBack, 'aadhaarBack');
-
-      const payload: AstrologerRegistrationData = {
+      const payload: AstrologerKycRegistrationData = {
         fullName,
         displayName,
+        dob,
         gender,
-        dateOfBirth: dob,
-        city,
-        state,
-        pincode,
-        country,
         experience: Number(experience),
+        address: {city, state, pincode, country},
         specializations: selectedSpecs,
         languages: selectedLangs,
-        bio,
         chatRate: Number(chatRate),
-        callRate: Number(callRate),
-        videoRate: Number(videoRate),
-        aadhaarNumber: aadhaar,
-        panNumber: pan,
-        bankAccountNumber: bankAccount,
-        ifscCode: ifsc,
-        accountHolderName: accountHolder,
-        bankName,
-        certificates: certificateUrls,
-        profilePhoto: profilePhotoUrl,
-        agreementAccepted,
-        termsAccepted,
+        voiceCallRate: Number(callRate),
+        videoCallRate: Number(videoRate),
+        panCard: {number: pan, photoUrl: panCard.uploadedUrl},
+        aadharCard: {number: aadhaar, photoUrl: aadhaarCard.uploadedUrl},
+        profilePhotoUrl: profilePhoto.uploadedUrl,
+        bankDetails: {
+          accountHolderName: accountHolder,
+          accountNumber: bankAccount,
+          bankName,
+          ifscCode: ifsc,
+        },
       };
-      const response = await registrationService.submit(payload);
+      const response = await registrationService.submitKyc(payload);
       navigation.navigate('Submitted', {applicationId: response.applicationId});
     } catch {
-      Alert.alert('Error', 'Could not upload documents or submit the application. Please try again.');
+      Alert.alert('Error', 'Could not submit the application. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -434,7 +438,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           <>
             <Text style={styles.sectionTitle}>Upload Documents</Text>
             <Text style={styles.rateNote}>
-              Select your documents now. They will be uploaded when you submit your application.
+              Select your documents now. They will be uploaded before you review the agreements.
             </Text>
             <TouchableOpacity
               style={styles.uploadBox}
@@ -450,41 +454,9 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
               <Text style={styles.uploadFileName}>{documents.profilePhoto.name}</Text>
             )}
 
-            <TouchableOpacity
-              style={styles.uploadBox}
-              onPress={() => chooseDocuments('certificates')}
-              disabled={loading}>
-              <Text style={styles.uploadIcon}>📜</Text>
-              <Text style={styles.uploadLabel}>Certificates / Degrees</Text>
-              <Text style={styles.uploadBtn}>
-                {documents.certificates.length > 0
-                  ? `${documents.certificates.length} selected`
-                  : 'Choose ↑'}
-              </Text>
-            </TouchableOpacity>
-            {documents.certificates.map(file => (
-              <View key={file.uri} style={styles.uploadFileRow}>
-                <Text style={styles.uploadFileName}>
-                  {file.name} · {file.uploadedUrl ? 'Uploaded' : 'Selected'}
-                </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    setDocuments(current => ({
-                      ...current,
-                      certificates: current.certificates.filter(item => item.uri !== file.uri),
-                    }))
-                  }
-                  disabled={loading}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Remove ${file.name}`}>
-                  <Text style={styles.removeFile}>Remove</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-
             {([
-              {slot: 'aadhaarFront', label: 'Aadhaar Card — Front'},
-              {slot: 'aadhaarBack', label: 'Aadhaar Card — Back'},
+              {slot: 'panCard', label: 'PAN Card'},
+              {slot: 'aadhaarCard', label: 'Aadhaar Card'},
             ] as const).map(({slot, label}) => {
               const file = documents[slot];
               return (

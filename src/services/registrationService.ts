@@ -1,7 +1,7 @@
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import type {
-  AstrologerRegistrationData,
+  AstrologerKycRegistrationData,
   RegistrationDocumentFile,
   RegistrationDocumentKind,
   RegistrationResponse,
@@ -31,11 +31,11 @@ export const registrationService = {
     return data.url;
   },
 
-  async submit(
-    payload: AstrologerRegistrationData,
+  async submitKyc(
+    payload: AstrologerKycRegistrationData,
   ): Promise<RegistrationResponse> {
     const {data} = await apiClient.post<RegistrationResponse>(
-      Endpoints.registration.submit,
+      Endpoints.registration.submitKyc,
       payload,
     );
     return data;
