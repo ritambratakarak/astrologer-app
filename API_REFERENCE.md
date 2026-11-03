@@ -520,3 +520,4 @@ isIn(['profilePhoto', 'panPhoto', 'aadharPhoto', 'certificate', 'other'])
         .withMessage('documentType must be one of: profilePhoto, panPhoto, aadharPhoto, certificate, other'),
     handleValidationErrors,  
 
+If uploads still return 500, the remaining fix is in the backend upload handler or storage configuration, which isn’t present in this repository. The backend logs for the failing request will be needed to identify that server-side cause. The client change is in AstrologerRegisterScreen.tsx

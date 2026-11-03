@@ -290,14 +290,25 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
 
       try {
         setLoading(true);
-        await Promise.all([
-          uploadDocument(profilePhoto, 'profilePhoto'),
-          uploadDocument(panCard, 'panPhoto'),
-          uploadDocument(aadhaarCard, 'aadharPhoto'),
-          ...certificates.map(certificate =>
-            uploadDocument(certificate, 'certificate'),
-          ),
-        ]);
+        const uploads: Array<{
+          file: RegistrationDocumentFile;
+          documentType: RegistrationDocumentKind;
+        }> = [
+          {file: profilePhoto, documentType: 'profilePhoto'},
+          {file: panCard, documentType: 'panPhoto'},
+          {file: aadhaarCard, documentType: 'aadharPhoto'},
+          ...certificates.map(file => ({
+            file,
+            documentType: 'certificate' as const,
+          })),
+        ];
+
+        for (const upload of uploads) {
+          console.log(
+            `[AstrologerRegistration] Uploading ${upload.documentType}`,
+          );
+          await uploadDocument(upload.file, upload.documentType);
+        }
         console.log('[AstrologerRegistration] Documents uploaded for step 6');
         setStep(7);
       } catch (error) {
