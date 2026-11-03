@@ -146,7 +146,11 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           rate => rate.trim() !== '' && Number.isFinite(Number(rate)) && Number(rate) >= 10,
         );
       case 4:
-        return /^\d{12}$/.test(aadhaar) && /^[A-Z]{5}\d{4}[A-Z]$/i.test(pan.trim());
+        return (
+          aadhaar.length === 12 &&
+          /^\d{12}$/.test(aadhaar) &&
+          /^[A-Z]{5}\d{4}[A-Z]$/.test(pan.trim().toUpperCase())
+        );
       case 5:
         return Boolean(
           accountHolder.trim() &&
@@ -498,8 +502,26 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           <>
             <Text style={styles.sectionTitle}>KYC Documents</Text>
             <Text style={styles.rateNote}>Required for identity verification. Keep originals handy.</Text>
-            <Input label="AADHAAR NUMBER" placeholder="XXXX XXXX XXXX" value={aadhaar} onChangeText={setAadhaar} keyboardType="numeric" maxLength={12} />
-            <Input label="PAN NUMBER" placeholder="ABCDE1234F" value={pan} onChangeText={setPan} autoCapitalize="characters" maxLength={10} />
+            <Input
+              label="AADHAAR NUMBER"
+              placeholder="XXXX XXXX XXXX"
+              value={aadhaar}
+              onChangeText={value =>
+                setAadhaar(value.replace(/\D/g, '').slice(0, 12))
+              }
+              keyboardType="numeric"
+              maxLength={12}
+            />
+            <Input
+              label="PAN NUMBER"
+              placeholder="ABCDE1234F"
+              value={pan}
+              onChangeText={value =>
+                setPan(value.replace(/\s/g, '').toUpperCase().slice(0, 10))
+              }
+              autoCapitalize="characters"
+              maxLength={10}
+            />
             <View style={styles.infoBox}>
               <Text style={styles.infoText}>
                 🔒 Your documents are encrypted and stored securely. Only used for KYC verification.
