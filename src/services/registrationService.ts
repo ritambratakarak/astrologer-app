@@ -8,6 +8,16 @@ import type {
   RegistrationResponse,
 } from '../types/registration';
 
+interface UploadDocumentResponse {
+  status?: number;
+  success?: boolean;
+  data?: {
+    url?: unknown;
+  };
+  url?: unknown;
+  message?: string;
+}
+
 export const registrationService = {
   async uploadDocument(
     file: RegistrationDocumentFile,
@@ -15,9 +25,10 @@ export const registrationService = {
   ): Promise<string> {
     const documentNames: Record<RegistrationDocumentKind, string> = {
       profilePhoto: 'Profile Photo',
-      panCard: 'PAN Card',
-      aadhaarCard: 'Aadhaar Card',
+      panPhoto: 'PAN Card',
+      aadharPhoto: 'Aadhaar Card',
       certificate: 'Certificate',
+      other: 'Other',
     };
     const formData = new FormData();
     formData.append('file', {
@@ -28,15 +39,15 @@ export const registrationService = {
     formData.append('documentName', documentNames[documentType]);
     formData.append('documentType', documentType);
 
-    let data: {url?: unknown; message?: string; success?: boolean};
+    let response: UploadDocumentResponse;
     try {
-      ({data} = await apiClient.post<{
-        url?: unknown;
-        message?: string;
-        success?: boolean;
-      }>(Endpoints.registration.uploadDocument, formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
-      }));
+      ({data: response} = await apiClient.post<UploadDocumentResponse>(
+        Endpoints.registration.uploadDocument,
+        formData,
+        {
+          headers: {'Content-Type': 'multipart/form-data'},
+        },
+      ));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('[Registration] Document upload request failed', {
@@ -57,14 +68,17 @@ export const registrationService = {
       throw error;
     }
 
-    if (typeof data.url !== 'string' || !data.url.trim()) {
+    const url = response.data?.url ?? response.url;
+    if (typeof url !== 'string' || !url.trim()) {
       console.error('[Registration] Upload response did not include a valid URL', {
         documentType,
-        response: data,
+        response,
       });
-      throw new Error('Document upload response did not include a URL.');
+      throw new Error(
+        response.message || 'Document upload response did not include a URL.',
+      );
     }
-    return data.url;
+    return url;
   },
 
   async submitKyc(

@@ -364,8 +364,15 @@ Content-Type: multipart/form-data
 Fields:
   file: document file
   documentName: human-readable document name (for example, "Profile Photo")
-  documentType: profilePhoto | panCard | aadhaarCard | certificate
-Response: { "url": "uploaded document URL" }
+  documentType: profilePhoto | panPhoto | aadharPhoto | certificate | other
+Response: {
+  "status": 200,
+  "success": true,
+  "data": {
+    "url": "uploaded document URL"
+  },
+  "message": "Document uploaded successfully."
+}
 ```
 
 Documents are selected in the registration form and uploaded before the user submits.
@@ -509,72 +516,3 @@ All responses are fully typed with TypeScript interfaces:
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
 
-
-registrationService.ts:61 [Registration] Upload response did not include a valid URL 
-{documentType: 'certificate', response: {…}}
-documentType
-: 
-"certificate"
-response
-: 
-data
-: 
-{userId: '6ae607da84684ee7a6352981', documentName: 'Certificate', documentType: 'certificate', url: 'uploads/kyc/fdce51f3e71b97fb0663610f768b29e0.jpeg', _id: '6aea1f16d4502de57ffe0ffd', createdAt: '2026-11-03T17:51:18.765Z', updatedAt: '2026-11-03T17:51:18.765Z', id: '6aea1f16d4502de57ffe0ffd'}
-message
-: 
-"Document uploaded successfully."
-status
-: 
-200
-success
-: 
-true
-[[Prototype]]
-: 
-Object
-[[Prototype]]
-: 
-Object
-registrationService.ts:42 [Registration] Document upload request failed 
-{documentType: 'aadhaarCard', status: 500, response: {…}, code: 'ERR_BAD_RESPONSE', message: 'Request failed with status code 500', url: '/astrologer/registration/upload-document', method: 'post'}
-code
-: 
-"ERR_BAD_RESPONSE"
-documentType
-: 
-"aadhaarCard"
-message
-: 
-"Request failed with status code 500"
-method
-: 
-"post"
-response
-: 
-data
-: 
-null
-errorMessage
-: 
-"An unexpected error occurred. Please try again."
-message
-: 
-"An unexpected error occurred. Please try again."
-status
-: 
-500
-success
-: 
-false
-[[Prototype]]
-: 
-Object
-status
-: 
-500
-url
-: 
-"/astrologer/registration/upload-document"
-[[Prototype]]
-: 
-Objec

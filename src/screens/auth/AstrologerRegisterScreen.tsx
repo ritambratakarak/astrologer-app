@@ -292,8 +292,8 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         setLoading(true);
         await Promise.all([
           uploadDocument(profilePhoto, 'profilePhoto'),
-          uploadDocument(panCard, 'panCard'),
-          uploadDocument(aadhaarCard, 'aadhaarCard'),
+          uploadDocument(panCard, 'panPhoto'),
+          uploadDocument(aadhaarCard, 'aadharPhoto'),
           ...certificates.map(certificate =>
             uploadDocument(certificate, 'certificate'),
           ),

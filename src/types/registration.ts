@@ -36,9 +36,10 @@ export interface AstrologerKycRegistrationData {
 
 export type RegistrationDocumentKind =
   | 'profilePhoto'
-  | 'panCard'
-  | 'aadhaarCard'
-  | 'certificate';
+  | 'panPhoto'
+  | 'aadharPhoto'
+  | 'certificate'
+  | 'other';
 
 export interface RegistrationDocumentFile {
   uri: string;
