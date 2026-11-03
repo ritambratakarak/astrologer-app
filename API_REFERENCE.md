@@ -516,3 +516,7 @@ All responses are fully typed with TypeScript interfaces:
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
 
+isIn(['profilePhoto', 'panPhoto', 'aadharPhoto', 'certificate', 'other'])
+        .withMessage('documentType must be one of: profilePhoto, panPhoto, aadharPhoto, certificate, other'),
+    handleValidationErrors,  
+
