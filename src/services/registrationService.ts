@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import type {
@@ -27,12 +28,40 @@ export const registrationService = {
     formData.append('documentName', documentNames[documentType]);
     formData.append('documentType', documentType);
 
-    const {data} = await apiClient.post<{url: string}>(
-      Endpoints.registration.uploadDocument,
-      formData,
-      {headers: {'Content-Type': 'multipart/form-data'}},
-    );
+    let data: {url?: unknown; message?: string; success?: boolean};
+    try {
+      ({data} = await apiClient.post<{
+        url?: unknown;
+        message?: string;
+        success?: boolean;
+      }>(Endpoints.registration.uploadDocument, formData, {
+        headers: {'Content-Type': 'multipart/form-data'},
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('[Registration] Document upload request failed', {
+          documentType,
+          status: error.response?.status,
+          response: error.response?.data,
+          code: error.code,
+          message: error.message,
+          url: error.config?.url,
+          method: error.config?.method,
+        });
+      } else {
+        console.error('[Registration] Document upload failed', {
+          documentType,
+          error,
+        });
+      }
+      throw error;
+    }
+
     if (typeof data.url !== 'string' || !data.url.trim()) {
+      console.error('[Registration] Upload response did not include a valid URL', {
+        documentType,
+        response: data,
+      });
       throw new Error('Document upload response did not include a URL.');
     }
     return data.url;

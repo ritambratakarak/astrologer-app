@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import axios from 'axios';
 import {
   Modal,
   Platform,
@@ -299,7 +300,13 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         ]);
         console.log('[AstrologerRegistration] Documents uploaded for step 6');
         setStep(7);
-      } catch {
+      } catch (error) {
+        console.error('[AstrologerRegistration] Failed to upload documents at step 6', {
+          status: axios.isAxiosError(error) ? error.response?.status : undefined,
+          response: axios.isAxiosError(error) ? error.response?.data : undefined,
+          code: axios.isAxiosError(error) ? error.code : undefined,
+          message: error instanceof Error ? error.message : String(error),
+        });
         Alert.alert('Error', 'Could not upload documents. Please try again.');
       } finally {
         setLoading(false);
