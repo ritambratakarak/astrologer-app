@@ -519,8 +519,38 @@ All responses are fully typed with TypeScript interfaces:
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
 
-isIn(['profilePhoto', 'panPhoto', 'aadharPhoto', 'certificate', 'other'])
-        .withMessage('documentType must be one of: profilePhoto, panPhoto, aadharPhoto, certificate, other'),
-    handleValidationErrors,  
-
-If uploads still return 500, the remaining fix is in the backend upload handler or storage configuration, which isn’t present in this repository. The backend logs for the failing request will be needed to identify that server-side cause. The client change is in AstrologerRegisterScreen.tsx
+this is demo paylod of the astrologer resistration api payload
+{
+  "fullName": "Ravi Sharma",
+  "degree": "M.A. in Jyotish Vidya",
+  "experience": 8,
+  "secondaryContact": "9123456789",
+  "profilePhotoUrl": "/uploads/1700000000000-profile.jpg",
+  "panCard": {
+    "number": "ABCDE1234F",
+    "photoUrl": "/uploads/1700000000001-pan.jpg"
+  },
+  "aadharCard": {
+    "number": "123456789012",
+    "photoUrl": "/uploads/1700000000002-aadhar.jpg"
+  },
+  "certificateUrls": [
+    "/uploads/1700000000003-cert.jpg"
+  ],
+  "address": {
+    "street": "123 Temple Road",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400001",
+    "country": "India"
+  },
+  "bankDetails": {
+    "accountHolderName": "Ravi Sharma",
+    "accountNumber": "9876543210123",
+    "bankName": "State Bank of India",
+    "ifscCode": "SBIN0001234",
+    "upiId": "ravi@upi"
+  },
+  "specializations": ["vedic", "kundali"],
+  "languages": ["Hindi", "English"]
+}

@@ -374,7 +374,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           ifscCode: ifsc,
         },
       };
-      console.log('[AstrologerRegistration] Submitting KYC application from step 8');
+      console.log('[AstrologerRegistration] Submitting KYC application from step 8', payload);
       const response = await registrationService.submitKyc(payload);
       navigation.navigate('Submitted', {applicationId: response.applicationId});
     } catch {
