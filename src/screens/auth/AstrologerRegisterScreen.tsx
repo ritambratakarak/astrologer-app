@@ -374,12 +374,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           ifscCode: ifsc,
         },
       };
-      console.log('[AstrologerRegistration] Submitting uploaded document URLs', {
-        profilePhotoUrl: payload.profilePhotoUrl,
-        panPhotoUrl: payload.panCard.photoUrl,
-        aadharPhotoUrl: payload.aadharCard.photoUrl,
-        certificateUrls: payload.certificateUrls,
-      });
+      console.log('[AstrologerRegistration] Submitting uploaded document URLs', payload);
       const response = await registrationService.submitKyc(payload);
       navigation.navigate('Submitted', {applicationId: response.applicationId});
     } catch {

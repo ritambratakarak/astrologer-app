@@ -554,3 +554,50 @@ this is demo paylod of the astrologer resistration api payload
   "specializations": ["vedic", "kundali"],
   "languages": ["Hindi", "English"]
 }
+
+{
+    "fullName": "Dgfgg",
+    "displayName": "Dhhb",
+    "dob": "02/11/2026",
+    "gender": "male",
+    "experience": 12,
+    "address": {
+        "city": "Tedt",
+        "state": "Delhi ",
+        "pincode": "189888",
+        "country": "Andorra"
+    },
+    "specializations": [
+        "Vedic",
+        "Numerology",
+        "Tarot",
+        "Prashna"
+    ],
+    "languages": [
+        "Bengali",
+        "Hindi",
+        "English"
+    ],
+    "bio": "Fvfggh",
+    "chatRate": 20,
+    "voiceCallRate": 20,
+    "videoCallRate": 20,
+    "panCard": {
+        "number": "DGFGG1234R",
+        "photoUrl": "http://localhost:8000/uploads/kyc/6facabf4d432c8ae0c60a771c4693ced.png"
+    },
+    "aadharCard": {
+        "number": "158888888888",
+        "photoUrl": "http://localhost:8000/uploads/kyc/ac7688c6ce570cee9852782eb325c308.jpg"
+    },
+    "profilePhotoUrl": "http://localhost:8000/uploads/kyc/2fb33770ca56652dc44c5921ddcb48d9.jpg",
+    "certificateUrls": [
+        "http://localhost:8000/uploads/kyc/2a6f22e415131fe24a295965b2c1325f.jpeg"
+    ],
+    "bankDetails": {
+        "accountHolderName": "1445677677777777",
+        "accountNumber": "45800.99998999",
+        "bankName": "Fbfbbb",
+        "ifscCode": "GFGGHJJJJJ"
+    }
+}
