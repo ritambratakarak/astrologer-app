@@ -103,7 +103,21 @@ export const registrationService = {
   ): Promise<RegistrationResponse> {
     const {data} = await apiClient.post<RegistrationResponse>(
       Endpoints.registration.submitKyc,
-      payload,
+      {
+        ...payload,
+        profilePhotoUrl: normalizeUploadedDocumentUrl(payload.profilePhotoUrl),
+        panCard: {
+          ...payload.panCard,
+          photoUrl: normalizeUploadedDocumentUrl(payload.panCard.photoUrl),
+        },
+        aadharCard: {
+          ...payload.aadharCard,
+          photoUrl: normalizeUploadedDocumentUrl(payload.aadharCard.photoUrl),
+        },
+        certificateUrls: payload.certificateUrls.map(
+          normalizeUploadedDocumentUrl,
+        ),
+      },
     );
     return data;
   },
