@@ -12,6 +12,7 @@ export interface AstrologerKycRegistrationData {
   };
   specializations: string[];
   languages: string[];
+  bio: string;
   chatRate: number;
   voiceCallRate: number;
   videoCallRate: number;
@@ -24,6 +25,7 @@ export interface AstrologerKycRegistrationData {
     photoUrl: string;
   };
   profilePhotoUrl: string;
+  certificateUrls: string[];
   bankDetails: {
     accountHolderName: string;
     accountNumber: string;
@@ -35,7 +37,8 @@ export interface AstrologerKycRegistrationData {
 export type RegistrationDocumentKind =
   | 'profilePhoto'
   | 'panCard'
-  | 'aadhaarCard';
+  | 'aadhaarCard'
+  | 'certificate';
 
 export interface RegistrationDocumentFile {
   uri: string;

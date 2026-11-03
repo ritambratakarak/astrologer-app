@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Modal,
   Platform,
@@ -33,6 +33,7 @@ type RegistrationDocuments = {
   profilePhoto: RegistrationDocumentFile | null;
   panCard: RegistrationDocumentFile | null;
   aadhaarCard: RegistrationDocumentFile | null;
+  certificates: RegistrationDocumentFile[];
 };
 
 const TOTAL_STEPS = 8;
@@ -78,6 +79,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
     profilePhoto: null,
     panCard: null,
     aadhaarCard: null,
+    certificates: [],
   });
 
   // Form state
@@ -112,6 +114,64 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  useEffect(() => {
+    console.log(
+      `[AstrologerRegistration] Step ${step} of ${TOTAL_STEPS}: ${STEP_TITLES[step - 1]}`,
+    );
+  }, [step]);
+
+  function isStepValid(currentStep: number) {
+    switch (currentStep) {
+      case 1:
+        return Boolean(
+          fullName.trim() &&
+            displayName.trim() &&
+            parseDate(dob) &&
+            city.trim() &&
+            state.trim() &&
+            /^\d{6}$/.test(pincode) &&
+            country.trim(),
+        );
+      case 2:
+        return (
+          experience.trim() !== '' &&
+          Number.isFinite(Number(experience)) &&
+          Number(experience) >= 0 &&
+          selectedSpecs.length > 0 &&
+          selectedLangs.length > 0 &&
+          bio.trim() !== ''
+        );
+      case 3:
+        return [chatRate, callRate, videoRate].every(
+          rate => rate.trim() !== '' && Number.isFinite(Number(rate)) && Number(rate) >= 10,
+        );
+      case 4:
+        return /^\d{12}$/.test(aadhaar) && /^[A-Z]{5}\d{4}[A-Z]$/i.test(pan.trim());
+      case 5:
+        return Boolean(
+          accountHolder.trim() &&
+            bankName.trim() &&
+            bankAccount.trim() &&
+            ifsc.trim(),
+        );
+      case 6:
+        return Boolean(
+          documents.profilePhoto &&
+            documents.panCard &&
+            documents.aadhaarCard &&
+            documents.certificates.length > 0,
+        );
+      case 7:
+        return agreementAccepted;
+      case 8:
+        return termsAccepted;
+      default:
+        return false;
+    }
+  }
+
+  const canContinue = isStepValid(step);
+
   function toggleSpec(s: string) {
     setSelectedSpecs(prev =>
       prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s],
@@ -144,10 +204,11 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
     );
   }
 
-  async function chooseDocuments(target: DocumentSlot) {
+  async function chooseDocuments(target: DocumentSlot | 'certificates') {
     try {
       const selectedFiles = await pick({
         type: target === 'profilePhoto' ? [types.images] : [types.images, types.pdf],
+        allowMultiSelection: target === 'certificates',
       });
       const files: RegistrationDocumentFile[] = selectedFiles.map((file, index) => ({
         uri: file.uri,
@@ -155,7 +216,14 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         type: file.type ?? 'application/octet-stream',
       }));
 
-      setDocuments(current => ({...current, [target]: files[0]}));
+      if (target === 'certificates') {
+        setDocuments(current => ({
+          ...current,
+          certificates: [...current.certificates, ...files],
+        }));
+      } else {
+        setDocuments(current => ({...current, [target]: files[0]}));
+      }
     } catch (error) {
       if (isErrorWithCode(error) && error.code === errorCodes.OPERATION_CANCELED) {
         return;
@@ -178,6 +246,9 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         current.aadhaarCard?.uri === uri
           ? {...current.aadhaarCard, uploadedUrl}
           : current.aadhaarCard,
+      certificates: current.certificates.map(file =>
+        file.uri === uri ? {...file, uploadedUrl} : file,
+      ),
     }));
   }
 
@@ -194,6 +265,8 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   }
 
   async function handleNext() {
+    console.log(`[AstrologerRegistration] Continuing from step ${step}`);
+
     if (step === 7 && !agreementAccepted) {
       Alert.alert('Required', 'Please accept the Astrologer Agreement to continue.');
       return;
@@ -205,11 +278,11 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
     }
 
     if (step === 6) {
-      const {profilePhoto, panCard, aadhaarCard} = documents;
-      if (!profilePhoto || !panCard || !aadhaarCard) {
+      const {profilePhoto, panCard, aadhaarCard, certificates} = documents;
+      if (!profilePhoto || !panCard || !aadhaarCard || certificates.length === 0) {
         Alert.alert(
           'Required',
-          'Please select a profile photo, PAN card, and Aadhaar card.',
+          'Please select a profile photo, PAN card, Aadhaar card, and at least one certificate.',
         );
         return;
       }
@@ -220,7 +293,11 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           uploadDocument(profilePhoto, 'profilePhoto'),
           uploadDocument(panCard, 'panCard'),
           uploadDocument(aadhaarCard, 'aadhaarCard'),
+          ...certificates.map(certificate =>
+            uploadDocument(certificate, 'certificate'),
+          ),
         ]);
+        console.log('[AstrologerRegistration] Documents uploaded for step 6');
         setStep(7);
       } catch {
         Alert.alert('Error', 'Could not upload documents. Please try again.');
@@ -259,12 +336,19 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         address: {city, state, pincode, country},
         specializations: selectedSpecs,
         languages: selectedLangs,
+        bio,
         chatRate: Number(chatRate),
         voiceCallRate: Number(callRate),
         videoCallRate: Number(videoRate),
         panCard: {number: pan, photoUrl: panCard.uploadedUrl},
         aadharCard: {number: aadhaar, photoUrl: aadhaarCard.uploadedUrl},
         profilePhotoUrl: profilePhoto.uploadedUrl,
+        certificateUrls: documents.certificates.map(certificate => {
+          if (!certificate.uploadedUrl) {
+            throw new Error('Certificate upload response did not include a URL.');
+          }
+          return certificate.uploadedUrl;
+        }),
         bankDetails: {
           accountHolderName: accountHolder,
           accountNumber: bankAccount,
@@ -272,6 +356,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           ifscCode: ifsc,
         },
       };
+      console.log('[AstrologerRegistration] Submitting KYC application from step 8');
       const response = await registrationService.submitKyc(payload);
       navigation.navigate('Submitted', {applicationId: response.applicationId});
     } catch {
@@ -475,6 +560,40 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
                 </React.Fragment>
               );
             })}
+
+            <TouchableOpacity
+              style={styles.uploadBox}
+              onPress={() => chooseDocuments('certificates')}
+              disabled={loading}>
+              <Text style={styles.uploadIcon}>📜</Text>
+              <Text style={styles.uploadLabel}>Certificates / Degrees</Text>
+              <Text style={styles.uploadBtn}>
+                {documents.certificates.length > 0
+                  ? `${documents.certificates.length} selected`
+                  : 'Choose ↑'}
+              </Text>
+            </TouchableOpacity>
+            {documents.certificates.map(file => (
+              <View key={file.uri} style={styles.uploadFileRow}>
+                <Text style={styles.uploadFileName}>
+                  {file.name} · {file.uploadedUrl ? 'Uploaded' : 'Selected'}
+                </Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    setDocuments(current => ({
+                      ...current,
+                      certificates: current.certificates.filter(
+                        item => item.uri !== file.uri,
+                      ),
+                    }))
+                  }
+                  disabled={loading}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove ${file.name}`}>
+                  <Text style={styles.removeFile}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
           </>
         )}
 
@@ -533,6 +652,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           label={step === TOTAL_STEPS ? 'Submit Application →' : 'Continue →'}
           onPress={handleNext}
           loading={loading}
+          disabled={!canContinue}
         />
         <View style={{height: 40}} />
       </ScrollView>
