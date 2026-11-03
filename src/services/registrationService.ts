@@ -11,9 +11,11 @@ import type {
 interface UploadDocumentResponse {
   status?: number;
   success?: boolean;
-  data?: {
+  data?: Array<{
     url?: unknown;
-  };
+  }> | {
+    url?: unknown;
+  } | null;
   url?: unknown;
   message?: string;
 }
@@ -68,7 +70,10 @@ export const registrationService = {
       throw error;
     }
 
-    const url = response.data?.url ?? response.url;
+    const uploadedDocument = Array.isArray(response.data)
+      ? response.data[0]
+      : response.data;
+    const url = uploadedDocument?.url ?? response.url;
     if (typeof url !== 'string' || !url.trim()) {
       console.error('[Registration] Upload response did not include a valid URL', {
         documentType,

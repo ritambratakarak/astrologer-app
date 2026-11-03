@@ -368,10 +368,13 @@ Fields:
 Response: {
   "status": 200,
   "success": true,
-  "data": {
-    "url": "uploaded document URL"
-  },
-  "message": "Document uploaded successfully."
+  "data": [
+    {
+      "documentType": "profilePhoto",
+      "url": "uploads/kyc/example.jpg"
+    }
+  ],
+  "message": "Documents uploaded successfully."
 }
 ```
 
