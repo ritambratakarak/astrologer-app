@@ -20,6 +20,18 @@ interface UploadDocumentResponse {
   message?: string;
 }
 
+function normalizeUploadedDocumentUrl(value: string): string {
+  const uploadedUrl = value.trim();
+  if (/^https?:\/\//i.test(uploadedUrl)) {
+    const url = new URL(uploadedUrl);
+    return `${url.pathname}${url.search}`;
+  }
+  if (/^[a-z][a-z\d+.-]*:/i.test(uploadedUrl)) {
+    throw new Error('Upload response returned a non-server document URL.');
+  }
+  return uploadedUrl.startsWith('/') ? uploadedUrl : `/${uploadedUrl}`;
+}
+
 export const registrationService = {
   async uploadDocument(
     file: RegistrationDocumentFile,
@@ -83,7 +95,7 @@ export const registrationService = {
         response.message || 'Document upload response did not include a URL.',
       );
     }
-    return url;
+    return normalizeUploadedDocumentUrl(url);
   },
 
   async submitKyc(
