@@ -146,11 +146,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
           rate => rate.trim() !== '' && Number.isFinite(Number(rate)) && Number(rate) >= 10,
         );
       case 4:
-        return (
-          aadhaar.length === 12 &&
-          /^\d{12}$/.test(aadhaar) &&
-          /^[A-Z]{5}\d{4}[A-Z]$/.test(pan.trim().toUpperCase())
-        );
+        return Boolean(aadhaar.trim() && pan.trim());
       case 5:
         return Boolean(
           accountHolder.trim() &&

@@ -12,12 +12,19 @@ export const registrationService = {
     file: RegistrationDocumentFile,
     documentType: RegistrationDocumentKind,
   ): Promise<string> {
+    const documentNames: Record<RegistrationDocumentKind, string> = {
+      profilePhoto: 'Profile Photo',
+      panCard: 'PAN Card',
+      aadhaarCard: 'Aadhaar Card',
+      certificate: 'Certificate',
+    };
     const formData = new FormData();
     formData.append('file', {
       uri: file.uri,
       name: file.name,
       type: file.type,
     });
+    formData.append('documentName', documentNames[documentType]);
     formData.append('documentType', documentType);
 
     const {data} = await apiClient.post<{url: string}>(
