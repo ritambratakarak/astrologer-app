@@ -5,6 +5,8 @@ import type {
   AstrologerListResponse,
   AstrologerFilter,
   AstrologerReview,
+  AstrologerSelfProfile,
+  AstrologerSelfProfileApiResponse,
 } from '../types/astrologer';
 import type {AstrologerProfile} from '../types/user';
 import type {Consultation} from '../types/consultation';
@@ -66,11 +68,14 @@ export const astrologerService = {
   },
 
   // Self-profile (for logged-in astrologer)
-  async getSelfProfile(): Promise<AstrologerProfile> {
-    const {data} = await apiClient.get<AstrologerProfile>(
+  async getSelfProfile(): Promise<AstrologerSelfProfile> {
+    const {data: response} = await apiClient.get<AstrologerSelfProfileApiResponse>(
       Endpoints.astrologer.profile,
     );
-    return data;
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Could not load astrologer profile.');
+    }
+    return response.data;
   },
 
   async updateSelfProfile(
