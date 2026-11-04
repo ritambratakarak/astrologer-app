@@ -96,6 +96,16 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
           );
           return;
         }
+        if (
+          registrationStatus.isKycSubmitted &&
+          registrationStatus.status === 'rejected'
+        ) {
+          Toast.show('Your application is rejected. Connect to admin', {
+            duration: Toast.durations.LONG,
+          });
+          return;
+        }
+
         const isApproved = registrationStatus.isKycSubmitted &&
           registrationStatus.status === 'success';
         setAuth(
@@ -113,14 +123,6 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
         }
         if (registrationStatus.status === 'pending') {
           navigation.navigate('Submitted', {});
-          return;
-        }
-        if (registrationStatus.status === 'rejected') {
-          Toast.show(
-            `Registration rejected. Reason: ${registrationStatus.rejectionReason ?? 'Not provided.'}`,
-            {duration: Toast.durations.LONG},
-          );
-          navigation.navigate('AstrologerRegister');
           return;
         }
         return;
