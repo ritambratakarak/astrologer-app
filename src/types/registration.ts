@@ -1,8 +1,10 @@
 export interface AstrologerKycRegistrationData {
   fullName: string;
   displayName: string;
+  secondaryContact: string;
   dob: string;
   gender: 'male' | 'female' | 'other';
+  degree: string;
   experience: number;
   address: {
     city: string;

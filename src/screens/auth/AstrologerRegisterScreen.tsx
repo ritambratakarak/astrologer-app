@@ -86,6 +86,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   // Form state
   const [fullName, setFullName] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [secondaryContact, setSecondaryContact] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | 'other'>('male');
   const [dob, setDob] = useState('');
   const [datePickerVisible, setDatePickerVisible] = useState(false);
@@ -95,6 +96,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
   const [pincode, setPincode] = useState('');
   const [country, setCountry] = useState('');
 
+  const [degree, setDegree] = useState('');
   const [experience, setExperience] = useState('');
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
   const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
@@ -127,6 +129,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         return Boolean(
           fullName.trim() &&
             displayName.trim() &&
+            secondaryContact.trim() &&
             parseDate(dob) &&
             city.trim() &&
             state.trim() &&
@@ -135,6 +138,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         );
       case 2:
         return (
+          degree.trim() !== '' &&
           experience.trim() !== '' &&
           Number.isFinite(Number(experience)) &&
           Number(experience) >= 0 &&
@@ -348,8 +352,10 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
       const payload: AstrologerKycRegistrationData = {
         fullName,
         displayName,
+        secondaryContact,
         dob,
         gender,
+        degree,
         experience: Number(experience),
         address: {city, state, pincode, country},
         specializations: selectedSpecs,
@@ -377,7 +383,14 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
       console.log('[AstrologerRegistration] Submitting uploaded document URLs', payload);
       const response = await registrationService.submitKyc(payload);
       navigation.navigate('Submitted', {applicationId: response.applicationId});
-    } catch {
+    } catch (error) {
+      console.error('[AstrologerRegistration] Submission failed', {
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        response: axios.isAxiosError(error) ? error.response?.data : undefined,
+        code: axios.isAxiosError(error) ? error.code : undefined,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       Alert.alert('Error', 'Could not submit the application. Please try again.');
     } finally {
       setLoading(false);
@@ -411,6 +424,13 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
             <Text style={styles.sectionTitle}>Personal Information</Text>
             <Input label="FULL NAME" placeholder="Pandit Ramesh Kumar" value={fullName} onChangeText={setFullName} />
             <Input label="DISPLAY NAME" placeholder="Pandit Ramesh" value={displayName} onChangeText={setDisplayName} />
+            <Input
+              label="SECONDARY CONTACT"
+              placeholder="+91 98765 43210"
+              value={secondaryContact}
+              onChangeText={setSecondaryContact}
+              keyboardType="phone-pad"
+            />
             <Text style={styles.fieldLabel}>GENDER</Text>
             <View style={styles.chipRow}>
               {(['male', 'female', 'other'] as const).map(g => (
@@ -451,6 +471,7 @@ export default function AstrologerRegisterScreen({navigation}: AuthScreenProps<'
         {step === 2 && (
           <>
             <Text style={styles.sectionTitle}>Your Expertise</Text>
+            <Input label="DEGREE" placeholder="B.A. Astrology / M.Sc. Astrology" value={degree} onChangeText={setDegree} />
             <Input label="YEARS OF EXPERIENCE" placeholder="15" value={experience} onChangeText={setExperience} keyboardType="numeric" />
             <Text style={styles.fieldLabel}>SPECIALIZATIONS</Text>
             <View style={styles.chipRow}>
