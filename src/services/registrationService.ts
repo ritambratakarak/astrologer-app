@@ -1,7 +1,10 @@
 import axios from 'axios';
+import {API_BASE_URL} from '../constants';
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import type {
+  AstrologerRegistrationStatus,
+  AstrologerRegistrationStatusApiResponse,
   AstrologerKycRegistrationData,
   RegistrationDocumentFile,
   RegistrationDocumentKind,
@@ -123,10 +126,26 @@ export const registrationService = {
     return data;
   },
 
-  async getStatus(): Promise<RegistrationResponse> {
-    const {data} = await apiClient.get<RegistrationResponse>(
-      Endpoints.registration.status,
+  async getStatus(accessToken: string): Promise<AstrologerRegistrationStatus> {
+    const {data: response} = await axios.get<AstrologerRegistrationStatusApiResponse>(
+      `${API_BASE_URL}${Endpoints.registration.status}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        timeout: 15000,
+      },
     );
-    return data;
+    if (!response.success || typeof response.data?.isKycSubmitted !== 'boolean') {
+      throw new Error(response.message || 'Could not retrieve registration status.');
+    }
+    if (
+      response.data.isKycSubmitted &&
+      !['pending', 'success', 'rejected'].includes(response.data.status)
+    ) {
+      throw new Error('Registration status response contained an unsupported status.');
+    }
+    return response.data;
   },
 };

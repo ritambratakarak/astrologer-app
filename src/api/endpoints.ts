@@ -73,7 +73,7 @@ export const Endpoints = {
 
   // Registration
   registration: {
-    status: '/astrologer-registration/status',
+    status: '/astrologer/registration/status',
     uploadDocument: '/astrologer/registration/upload-document',
     submitKyc: '/astrologer/registration/kyc',
   },

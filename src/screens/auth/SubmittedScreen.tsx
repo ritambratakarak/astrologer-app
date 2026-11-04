@@ -9,8 +9,6 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-root-toast';
 import {Colors} from '../../theme/colors';
-import Button from '../../components/common/Button';
-import {useAuthStore} from '../../store/authStore';
 import type {AuthScreenProps} from '../../navigation/types';
 
 const TIMELINE = [
@@ -22,9 +20,11 @@ const TIMELINE = [
 
 export default function SubmittedScreen({route}: AuthScreenProps<'Submitted'>) {
   const {applicationId} = route.params;
-  const {setProfileComplete} = useAuthStore();
 
   function copyId() {
+    if (!applicationId) {
+      return;
+    }
     Clipboard.setString(applicationId);
     Toast.show('Application ID copied ✓');
   }
@@ -41,16 +41,18 @@ export default function SubmittedScreen({route}: AuthScreenProps<'Submitted'>) {
           Your KYC and profile documents have been received. Our team will review them shortly.
         </Text>
 
-        <View style={styles.idCard}>
-          <Text style={styles.idLabel}>Application ID</Text>
-          <Text style={styles.idValue}>{applicationId}</Text>
-          <View style={styles.idRow}>
-            <Text style={styles.idHint}>Save this for reference · </Text>
-            <TouchableOpacity onPress={copyId}>
-              <Text style={styles.idCopy}>Copy</Text>
-            </TouchableOpacity>
+        {applicationId ? (
+          <View style={styles.idCard}>
+            <Text style={styles.idLabel}>Application ID</Text>
+            <Text style={styles.idValue}>{applicationId}</Text>
+            <View style={styles.idRow}>
+              <Text style={styles.idHint}>Save this for reference · </Text>
+              <TouchableOpacity onPress={copyId}>
+                <Text style={styles.idCopy}>Copy</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        ) : null}
 
         <View style={styles.infoGrid}>
           {[
@@ -94,16 +96,9 @@ export default function SubmittedScreen({route}: AuthScreenProps<'Submitted'>) {
           ))}
         </View>
 
-        <Button
-          label="Go to Dashboard →"
-          //onPress={() => setProfileComplete(true)}
-          onPress={() => {setProfileComplete(true)}}
-          style={{marginTop: 8}}
-        />
         <Text style={styles.footer}>
-          Dashboard will show{' '}
-          <Text style={{color: Colors.text, fontWeight: '700'}}>Pending Approval</Text> status
-          until review is complete
+          You can sign in again to check your application status. Dashboard access will be
+          available after approval.
         </Text>
         <View style={{height: 28}} />
       </ScrollView>

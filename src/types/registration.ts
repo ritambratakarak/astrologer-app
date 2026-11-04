@@ -55,3 +55,22 @@ export interface RegistrationResponse {
   status: 'submitted' | 'under_review' | 'approved' | 'rejected';
   message: string;
 }
+
+export type AstrologerRegistrationReviewStatus =
+  | 'pending'
+  | 'success'
+  | 'rejected';
+
+export interface AstrologerRegistrationStatus {
+  isKycSubmitted: boolean;
+  status: AstrologerRegistrationReviewStatus;
+  rejectionReason: string | null;
+}
+
+export interface AstrologerRegistrationStatusApiResponse {
+  status: number;
+  success: boolean;
+  data: AstrologerRegistrationStatus;
+  message: string;
+  requestId: string;
+}

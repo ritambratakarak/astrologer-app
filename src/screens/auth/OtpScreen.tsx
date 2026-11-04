@@ -17,6 +17,7 @@ import AppHeader from '../../components/common/AppHeader';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import {authService} from '../../services/authService';
+import {registrationService} from '../../services/registrationService';
 import {useAuthStore} from '../../store/authStore';
 import type {AuthScreenProps} from '../../navigation/types';
 
@@ -66,25 +67,65 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
       return;
     }
 
-    let response: Awaited<ReturnType<typeof authService.verifyOtp>>;
     try {
       setLoading(true);
-      response = await authService.verifyOtp({phone, otp: code, userType: role});
-    } catch (error) {
-      const responseMessage = axios.isAxiosError<{message?: unknown}>(error)
-        ? error.response?.data?.message
-        : undefined;
-      const message = typeof responseMessage === 'string'
-        ? responseMessage
-        : error instanceof Error
-          ? error.message
-          : 'The OTP could not be verified.';
-      Alert.alert('Verification Failed', message);
-      setLoading(false);
-      return;
-    }
+      const response = await authService.verifyOtp({phone, otp: code, userType: role});
+      if (role === 'astrologer') {
+        let registrationStatus: Awaited<
+          ReturnType<typeof registrationService.getStatus>
+        >;
+        try {
+          registrationStatus = await registrationService.getStatus(
+            response.tokens.accessToken,
+          );
+        } catch (error) {
+          const responseMessage = axios.isAxiosError<{message?: unknown}>(error)
+            ? error.response?.data?.message
+            : undefined;
+          console.error('[AstrologerRegistration] Status lookup failed after OTP verification', {
+            status: axios.isAxiosError(error) ? error.response?.status : undefined,
+            response: axios.isAxiosError(error) ? error.response?.data : undefined,
+            code: axios.isAxiosError(error) ? error.code : undefined,
+            message: error instanceof Error ? error.message : String(error),
+          });
+          Alert.alert(
+            'Registration Status Unavailable',
+            typeof responseMessage === 'string'
+              ? responseMessage
+              : 'OTP was verified, but registration status could not be checked. Please try again.',
+          );
+          return;
+        }
+        const isApproved = registrationStatus.isKycSubmitted &&
+          registrationStatus.status === 'success';
+        setAuth(
+          response.tokens,
+          response.user.role,
+          response.user.id,
+          isApproved,
+          response.user.phone,
+          response.user.name,
+        );
 
-    try {
+        if (!registrationStatus.isKycSubmitted) {
+          navigation.navigate('AstrologerRegister');
+          return;
+        }
+        if (registrationStatus.status === 'pending') {
+          navigation.navigate('Submitted', {});
+          return;
+        }
+        if (registrationStatus.status === 'rejected') {
+          Toast.show(
+            `Registration rejected. Reason: ${registrationStatus.rejectionReason ?? 'Not provided.'}`,
+            {duration: Toast.durations.LONG},
+          );
+          navigation.navigate('AstrologerRegister');
+          return;
+        }
+        return;
+      }
+
       setAuth(
         response.tokens,
         response.user.role,
@@ -94,15 +135,24 @@ export default function OtpScreen({navigation, route}: AuthScreenProps<'Otp'>) {
         response.user.name,
       );
       if (!response.user.isProfileComplete) {
-        if (role === 'astrologer') {
-          navigation.navigate('AstrologerRegister');
-        } else {
-          navigation.navigate('ProfileSetup');
-        }
+        navigation.navigate('ProfileSetup');
       }
     } catch (error) {
-      console.error('Failed to establish the session after OTP verification.', error);
-      Alert.alert('Sign-in Failed', 'OTP verified, but sign-in could not be completed.');
+      const responseMessage = axios.isAxiosError<{message?: unknown}>(error)
+        ? error.response?.data?.message
+        : undefined;
+      const message = typeof responseMessage === 'string'
+        ? responseMessage
+        : error instanceof Error
+          ? error.message
+          : 'The OTP could not be verified.';
+      console.error('[Authentication] OTP verification or session setup failed', {
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        response: axios.isAxiosError(error) ? error.response?.data : undefined,
+        code: axios.isAxiosError(error) ? error.code : undefined,
+        message,
+      });
+      Alert.alert('Verification Failed', message);
     } finally {
       setLoading(false);
     }

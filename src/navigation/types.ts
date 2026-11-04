@@ -11,7 +11,7 @@ export type AuthStackParamList = {
   Otp: {phone: string; role: UserRole};
   ProfileSetup: undefined;
   AstrologerRegister: undefined;
-  Submitted: {applicationId: string};
+  Submitted: {applicationId?: string};
 };
 
 // ─── Customer Tab ─────────────────────────────────────────────────────────────
