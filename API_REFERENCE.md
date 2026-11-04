@@ -520,20 +520,91 @@ All responses are fully typed with TypeScript interfaces:
 - Pagination uses `page` parameter (1-indexed)
 
 
+get method
+{{api}}/astrologer/profile
+Berar token
 
-Get api
-{{api}}/astrologer/registration/status
-Bearer Token in Authorization
-
-response
+response 
 {
     "status": 200,
     "success": true,
     "data": {
-        "isKycSubmitted": true,
+        "_id": "6ae607da84684ee7a6352984",
+        "userId": "6ae607da84684ee7a6352981",
+        "experience": 12,
+        "languages": [
+            "Bengali",
+            "Hindi",
+            "English"
+        ],
+        "specializations": [
+            "Vedic",
+            "Numerology",
+            "Tarot",
+            "Prashna"
+        ],
+        "chatRate": 20,
+        "callRate": 20,
+        "videoRate": 20,
+        "rating": 0,
+        "totalReviews": 0,
+        "totalConsultations": 0,
         "status": "pending",
-        "rejectionReason": null
+        "isAvailableForChat": false,
+        "isAvailableForCall": false,
+        "isAvailableForVideo": false,
+        "documents": [],
+        "certificates": [
+            "/uploads/kyc/2a6f22e415131fe24a295965b2c1325f.jpeg"
+        ],
+        "isKycSubmitted": true,
+        "createdAt": "2026-10-31T15:23:06.503Z",
+        "updatedAt": "2026-11-04T03:52:39.782Z",
+        "__v": 0,
+        "aadharCard": {
+            "number": "158888888888",
+            "photo": "/uploads/kyc/ac7688c6ce570cee9852782eb325c308.jpg"
+        },
+        "address": {
+            "city": "Tedt",
+            "state": "Delhi",
+            "pincode": "189888",
+            "country": "Andorra"
+        },
+        "bankDetails": {
+            "accountHolderName": "Ritam",
+            "accountNumber": "4580099998999",
+            "bankName": "Fbfbbb",
+            "ifscCode": "UTIB0000580"
+        },
+        "bio": "Fvfggh",
+        "degree": "test",
+        "displayName": "Dhhb",
+        "dob": "02/11/2026",
+        "gender": "male",
+        "panCard": {
+            "number": "DGFGG1234R",
+            "photo": "/uploads/kyc/6facabf4d432c8ae0c60a771c4693ced.png"
+        },
+        "profilePhoto": "/uploads/kyc/2fb33770ca56652dc44c5921ddcb48d9.jpg",
+        "secondaryContact": "1234567890"
     },
-    "message": "Registration status fetched.",
-    "requestId": "9cc81871-62e8-47e3-91f3-0888085217cb"
+    "message": "Profile fetched successfully.",
+    "requestId": "ac3c2d6d-dad9-4a0f-9745-451fc877b457"
+}
+
+
+Patch
+/astrologer/profile
+Berar Token
+
+Body
+{
+  "bio": "Experienced vedic astrologer with 10+ years of practice.",
+  "experience": 10,
+  "chatRate": 20,
+  "callRate": 30,
+  "videoRate": 40,
+  "specializations": ["vedic", "tarot"],
+  "languages": ["Hindi", "English"]
 }
