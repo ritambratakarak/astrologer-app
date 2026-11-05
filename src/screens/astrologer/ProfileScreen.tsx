@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   View,
   Text,
+  Image,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -10,17 +11,31 @@ import {
   Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import ImagePicker, {type Image as PickedImage} from 'react-native-image-crop-picker';
 import {Colors} from '../../theme/colors';
+import {API_BASE_URL} from '../../constants';
 import AppHeader from '../../components/common/AppHeader';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Chip from '../../components/common/Chip';
 import Toast from 'react-native-root-toast';
 import {astrologerService} from '../../services/astrologerService';
+import {registrationService} from '../../services/registrationService';
 import {useAuthStore} from '../../store/authStore';
 import {SPECIALIZATIONS} from '../../constants';
 import {useNavigation} from '@react-navigation/native';
 import type {AstrologerSelfProfile} from '../../types/astrologer';
+
+function getProfilePhotoUri(photoPath?: string): string | null {
+  if (!photoPath) {
+    return null;
+  }
+  if (/^https?:\/\//i.test(photoPath)) {
+    return photoPath;
+  }
+  const serverOrigin = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+  return `${serverOrigin}${photoPath.startsWith('/') ? photoPath : `/${photoPath}`}`;
+}
 
 export default function AstrologerProfileScreen() {
   const navigation = useNavigation();
@@ -28,6 +43,7 @@ export default function AstrologerProfileScreen() {
   const [profile, setProfile] = useState<AstrologerSelfProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
+  const [profilePhotoUri, setProfilePhotoUri] = useState<string | null>(null);
   const [bio, setBio] = useState('');
   const [experience, setExperience] = useState('');
   const [languages, setLanguages] = useState('');
@@ -36,6 +52,7 @@ export default function AstrologerProfileScreen() {
   const [callRate, setCallRate] = useState('');
   const [videoRate, setVideoRate] = useState('');
   const [loading, setLoading] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -43,6 +60,7 @@ export default function AstrologerProfileScreen() {
       setProfileError('');
       const data = await astrologerService.getSelfProfile();
       setProfile(data);
+      setProfilePhotoUri(getProfilePhotoUri(data.profilePhoto));
       setBio(data.bio ?? '');
       setExperience(String(data.experience ?? ''));
       setLanguages((data.languages ?? []).join(', '));
@@ -65,6 +83,68 @@ export default function AstrologerProfileScreen() {
 
   function toggleSpec(s: string) {
     setSelectedSpecs(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  }
+
+  async function changeProfilePhoto() {
+    if (photoUploading) {
+      return;
+    }
+
+    let image: PickedImage;
+    try {
+      image = await ImagePicker.openPicker({
+        mediaType: 'photo',
+        cropping: true,
+        cropperCircleOverlay: true,
+        width: 500,
+        height: 500,
+        compressImageQuality: 0.8,
+      });
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'E_PICKER_CANCELLED'
+      ) {
+        return;
+      }
+      Alert.alert(
+        'Image Selection Failed',
+        'Could not select the profile image. Please try again.',
+      );
+      return;
+    }
+
+    const previousPhotoUri = profilePhotoUri;
+    setProfilePhotoUri(image.path);
+    setPhotoUploading(true);
+    try {
+      const photoPath = await registrationService.uploadDocument(
+        {
+          uri: image.path,
+          name: image.filename ?? 'astrologer-profile.jpg',
+          type: image.mime,
+        },
+        'profilePhoto',
+      );
+      await astrologerService.updateProfilePhoto(photoPath);
+      const updatedPhotoUri = getProfilePhotoUri(photoPath);
+      setProfilePhotoUri(updatedPhotoUri);
+      setProfile(current =>
+        current ? {...current, profilePhoto: photoPath} : current,
+      );
+      Toast.show('Profile photo updated successfully ✓');
+    } catch (error) {
+      console.error('[AstrologerProfile] Failed to update profile photo', error);
+      setProfilePhotoUri(previousPhotoUri);
+      Alert.alert(
+        'Photo Update Failed',
+        'Could not update the profile photo. Please try again.',
+      );
+    } finally {
+      setPhotoUploading(false);
+    }
   }
 
   async function save() {
@@ -125,10 +205,28 @@ export default function AstrologerProfileScreen() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Avatar */}
         <View style={styles.avSection}>
-          <TouchableOpacity style={styles.avPick}>
-            <Text style={{fontSize: 32}}>🧙</Text>
+          <TouchableOpacity
+            style={styles.avPick}
+            onPress={changeProfilePhoto}
+            disabled={photoUploading}
+            accessibilityRole="button"
+            accessibilityLabel={
+              photoUploading ? 'Uploading profile photo' : 'Change profile photo'
+            }>
+            {profilePhotoUri ? (
+              <Image
+                source={{uri: profilePhotoUri}}
+                style={styles.avatarImage}
+                onError={() => setProfilePhotoUri(null)}
+              />
+            ) : (
+              <Text style={{fontSize: 32}}>🧙</Text>
+            )}
             <View style={styles.avBadge}><Text style={{fontSize: 11}}>✏️</Text></View>
           </TouchableOpacity>
+          {photoUploading && (
+            <ActivityIndicator color={Colors.gold} style={styles.photoLoader} />
+          )}
           <View style={{flexDirection: 'row', gap: 6}}>
             <Chip
               label={profile.status}
@@ -246,7 +344,9 @@ const styles = StyleSheet.create({
   loadMessage: {fontSize: 14, color: Colors.t2, marginVertical: 16, textAlign: 'center'},
   content: {paddingHorizontal: 20, paddingBottom: 40},
   avSection: {alignItems: 'center', marginBottom: 20},
-  avPick: {width: 88, height: 88, borderRadius: 44, backgroundColor: Colors.card2, borderWidth: 2, borderStyle: 'dashed', borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', marginBottom: 10, position: 'relative'},
+  avPick: {width: 88, height: 88, borderRadius: 44, backgroundColor: Colors.card2, borderWidth: 2, borderStyle: 'dashed', borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', marginBottom: 10, position: 'relative', overflow: 'hidden'},
+  avatarImage: {width: '100%', height: '100%', borderRadius: 44},
+  photoLoader: {position: 'absolute', top: 34},
   avBadge: {position: 'absolute', bottom: 2, right: 2, backgroundColor: Colors.gold, borderRadius: 11, width: 22, height: 22, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.bg},
   fieldLabel: {fontSize: 11, fontWeight: '600', color: Colors.t2, marginBottom: 8, letterSpacing: 0.3},
   detailsCard: {backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border2, borderRadius: 14, paddingHorizontal: 14, marginBottom: 18},

@@ -93,6 +93,10 @@ export const astrologerService = {
     );
   },
 
+  async updateProfilePhoto(profilePhoto: string): Promise<void> {
+    await apiClient.patch(Endpoints.astrologer.updateProfile, {profilePhoto});
+  },
+
   async updateAvailability(payload: {
     isOnline: boolean;
     chatEnabled: boolean;
