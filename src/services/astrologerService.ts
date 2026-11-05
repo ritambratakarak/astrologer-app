@@ -8,13 +8,19 @@ import type {
   AstrologerSelfProfile,
   AstrologerSelfProfileApiResponse,
 } from '../types/astrologer';
-import type {AstrologerProfile} from '../types/user';
 import type {Consultation} from '../types/consultation';
 
 export interface AstrologerRates {
   chatRate: number;
   callRate: number;
   videoRate: number;
+}
+
+export interface UpdateAstrologerProfilePayload extends AstrologerRates {
+  bio: string;
+  experience: number;
+  specializations: string[];
+  languages: string[];
 }
 
 export interface AstrologerDashboard {
@@ -79,13 +85,12 @@ export const astrologerService = {
   },
 
   async updateSelfProfile(
-    payload: Partial<AstrologerProfile>,
-  ): Promise<AstrologerProfile> {
-    const {data} = await apiClient.put<AstrologerProfile>(
+    payload: UpdateAstrologerProfilePayload,
+  ): Promise<void> {
+    await apiClient.patch(
       Endpoints.astrologer.updateProfile,
       payload,
     );
-    return data;
   },
 
   async updateAvailability(payload: {

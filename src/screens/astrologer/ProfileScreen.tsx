@@ -28,7 +28,6 @@ export default function AstrologerProfileScreen() {
   const [profile, setProfile] = useState<AstrologerSelfProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
-  const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [experience, setExperience] = useState('');
   const [languages, setLanguages] = useState('');
@@ -44,7 +43,6 @@ export default function AstrologerProfileScreen() {
       setProfileError('');
       const data = await astrologerService.getSelfProfile();
       setProfile(data);
-      setName(data.displayName ?? '');
       setBio(data.bio ?? '');
       setExperience(String(data.experience ?? ''));
       setLanguages((data.languages ?? []).join(', '));
@@ -73,11 +71,12 @@ export default function AstrologerProfileScreen() {
     try {
       setLoading(true);
       await astrologerService.updateSelfProfile({
-        name,
         bio,
         experience: Number(experience),
-        languages: languages.split(',').map(l => l.trim()),
-        specializations: selectedSpecs,
+        languages: languages.split(',').map(language => language.trim()).filter(Boolean),
+        specializations: selectedSpecs.map(specialization =>
+          specialization.toLowerCase(),
+        ),
         chatRate: Number(chatRate),
         callRate: Number(callRate),
         videoRate: Number(videoRate),
@@ -145,7 +144,6 @@ export default function AstrologerProfileScreen() {
           </View>
         </View>
 
-        <Input label="DISPLAY NAME" value={name} onChangeText={setName} />
         <View style={{marginBottom: 16}}>
           <Text style={styles.fieldLabel}>BIO</Text>
           <TextInput
@@ -164,6 +162,7 @@ export default function AstrologerProfileScreen() {
         <Text style={styles.fieldLabel}>PERSONAL & REGISTRATION DETAILS</Text>
         <View style={styles.detailsCard}>
           {[
+            {label: 'Display name', value: profile.displayName},
             {label: 'Degree', value: profile.degree},
             {label: 'Secondary contact', value: profile.secondaryContact},
             {label: 'Date of birth', value: profile.dob},
