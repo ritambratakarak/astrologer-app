@@ -519,92 +519,361 @@ All responses are fully typed with TypeScript interfaces:
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
 
+GET Api
+/astrologers?page=1&limit=10
+Beraer token
 
-get method
-{{api}}/astrologer/profile
-Berar token
-
-response 
 {
     "status": 200,
     "success": true,
     "data": {
-        "_id": "6ae607da84684ee7a6352984",
-        "userId": "6ae607da84684ee7a6352981",
-        "experience": 12,
-        "languages": [
-            "Bengali",
-            "Hindi",
-            "English"
+        "items": [
+            {
+                "_id": "6aa4330a342ad6c62d400bff",
+                "userId": {
+                    "_id": "6aa4330a342ad6c62d400bfd",
+                    "fullName": "Vikram Bhatia",
+                    "phone": "9100000005",
+                    "isOnline": false
+                },
+                "bio": "Prashna astrology expert and muhurta specialist. Answers life questions with pinpoint accuracy.",
+                "experience": 20,
+                "languages": [
+                    "Hindi",
+                    "Punjabi",
+                    "English"
+                ],
+                "specializations": [
+                    "prashna",
+                    "muhurta",
+                    "vedic"
+                ],
+                "chatRate": 30,
+                "callRate": 45,
+                "videoRate": 60,
+                "rating": 4.9,
+                "totalReviews": 380,
+                "totalConsultations": 920,
+                "status": "approved",
+                "isAvailableForChat": false,
+                "isAvailableForCall": true,
+                "isAvailableForVideo": true,
+                "documents": [],
+                "degree": "Jyotish Visharad",
+                "certificates": [],
+                "bankDetails": {
+                    "accountHolderName": "Vikram Bhatia",
+                    "accountNumber": "334455667788",
+                    "bankName": "PNB",
+                    "ifscCode": "PUNB0005678",
+                    "upiId": "vikram@upi"
+                },
+                "panCard": {
+                    "number": "EFGVB7890V"
+                },
+                "aadharCard": {
+                    "number": "567890123456"
+                },
+                "address": {
+                    "city": "Delhi",
+                    "state": "Delhi",
+                    "pincode": "110001",
+                    "country": "India"
+                },
+                "isKycSubmitted": true,
+                "createdAt": "2026-09-11T16:57:46.200Z",
+                "updatedAt": "2026-09-11T16:57:46.200Z",
+                "__v": 0
+            },
+            {
+                "_id": "6aa43309342ad6c62d400be3",
+                "userId": {
+                    "_id": "6aa43309342ad6c62d400be1",
+                    "fullName": "Pt. Ramesh Tiwari",
+                    "phone": "9100000001",
+                    "isOnline": false
+                },
+                "bio": "Expert in Vedic astrology with 15 years of experience. Specializes in kundali matching and career guidance.",
+                "experience": 15,
+                "languages": [
+                    "Hindi",
+                    "English"
+                ],
+                "specializations": [
+                    "vedic",
+                    "kundali",
+                    "muhurta"
+                ],
+                "chatRate": 20,
+                "callRate": 30,
+                "videoRate": 40,
+                "rating": 4.8,
+                "totalReviews": 230,
+                "totalConsultations": 580,
+                "status": "approved",
+                "isAvailableForChat": true,
+                "isAvailableForCall": true,
+                "isAvailableForVideo": false,
+                "documents": [],
+                "degree": "Jyotish Acharya",
+                "certificates": [],
+                "bankDetails": {
+                    "accountHolderName": "Ramesh Tiwari",
+                    "accountNumber": "123456789012",
+                    "bankName": "SBI",
+                    "ifscCode": "SBIN0001234",
+                    "upiId": "ramesh@upi"
+                },
+                "panCard": {
+                    "number": "ABCPT1234R"
+                },
+                "aadharCard": {
+                    "number": "123456789012"
+                },
+                "address": {
+                    "city": "Varanasi",
+                    "state": "Uttar Pradesh",
+                    "pincode": "221001",
+                    "country": "India"
+                },
+                "isKycSubmitted": true,
+                "createdAt": "2026-09-11T16:57:45.939Z",
+                "updatedAt": "2026-09-11T16:57:45.939Z",
+                "__v": 0
+            },
+            {
+                "_id": "6aa4330a342ad6c62d400c0d",
+                "userId": {
+                    "_id": "6aa4330a342ad6c62d400c0b",
+                    "fullName": "Rajendra Joshi",
+                    "phone": "9100000007",
+                    "isOnline": false
+                },
+                "bio": "Specializes in Kundali analysis for marriage and business compatibility.",
+                "experience": 10,
+                "languages": [
+                    "Hindi",
+                    "Gujarati"
+                ],
+                "specializations": [
+                    "kundali",
+                    "vedic",
+                    "muhurta"
+                ],
+                "chatRate": 18,
+                "callRate": 28,
+                "videoRate": 38,
+                "rating": 4.7,
+                "totalReviews": 160,
+                "totalConsultations": 390,
+                "status": "approved",
+                "isAvailableForChat": true,
+                "isAvailableForCall": true,
+                "isAvailableForVideo": false,
+                "documents": [],
+                "degree": "Jyotish Acharya",
+                "certificates": [],
+                "bankDetails": {
+                    "accountHolderName": "Rajendra Joshi",
+                    "accountNumber": "556677889900",
+                    "bankName": "SBI",
+                    "ifscCode": "SBIN0007890",
+                    "upiId": "rajendra@upi"
+                },
+                "panCard": {
+                    "number": "GHIRJ6789X"
+                },
+                "aadharCard": {
+                    "number": "789012345678"
+                },
+                "address": {
+                    "city": "Ahmedabad",
+                    "state": "Gujarat",
+                    "pincode": "380001",
+                    "country": "India"
+                },
+                "isKycSubmitted": true,
+                "createdAt": "2026-09-11T16:57:46.330Z",
+                "updatedAt": "2026-09-11T16:57:46.330Z",
+                "__v": 0
+            },
+            {
+                "_id": "6aa4330a342ad6c62d400bf1",
+                "userId": {
+                    "_id": "6aa4330a342ad6c62d400bef",
+                    "fullName": "Suresh Iyer",
+                    "phone": "9100000003",
+                    "isOnline": false
+                },
+                "bio": "Vastu consultant and palmist. Helping families design harmonious living spaces for over 12 years.",
+                "experience": 12,
+                "languages": [
+                    "Tamil",
+                    "English",
+                    "Telugu"
+                ],
+                "specializations": [
+                    "vastu",
+                    "palmistry"
+                ],
+                "chatRate": 25,
+                "callRate": 35,
+                "videoRate": 50,
+                "rating": 4.6,
+                "totalReviews": 187,
+                "totalConsultations": 410,
+                "status": "approved",
+                "isAvailableForChat": true,
+                "isAvailableForCall": true,
+                "isAvailableForVideo": true,
+                "documents": [],
+                "degree": "Vastu Shastra Diploma",
+                "certificates": [],
+                "bankDetails": {
+                    "accountHolderName": "Suresh Iyer",
+                    "accountNumber": "112233445566",
+                    "bankName": "ICICI",
+                    "ifscCode": "ICIC0003456"
+                },
+                "panCard": {
+                    "number": "CDEFSI9012T"
+                },
+                "aadharCard": {
+                    "number": "345678901234"
+                },
+                "address": {
+                    "city": "Chennai",
+                    "state": "Tamil Nadu",
+                    "pincode": "600001",
+                    "country": "India"
+                },
+                "isKycSubmitted": true,
+                "createdAt": "2026-09-11T16:57:46.076Z",
+                "updatedAt": "2026-09-11T16:57:46.076Z",
+                "__v": 0
+            },
+            {
+                "_id": "6aa4330a342ad6c62d400bea",
+                "userId": {
+                    "_id": "6aa43309342ad6c62d400be8",
+                    "fullName": "Kavya Menon",
+                    "phone": "9100000002",
+                    "isOnline": false
+                },
+                "bio": "Tarot reader and numerologist with a modern approach to ancient wisdom. 8 years of practice.",
+                "experience": 8,
+                "languages": [
+                    "English",
+                    "Malayalam",
+                    "Tamil"
+                ],
+                "specializations": [
+                    "tarot",
+                    "numerology"
+                ],
+                "chatRate": 15,
+                "callRate": 25,
+                "videoRate": 35,
+                "rating": 4.5,
+                "totalReviews": 145,
+                "totalConsultations": 320,
+                "status": "approved",
+                "isAvailableForChat": true,
+                "isAvailableForCall": false,
+                "isAvailableForVideo": true,
+                "documents": [],
+                "degree": "B.A. Psychology",
+                "certificates": [],
+                "bankDetails": {
+                    "accountHolderName": "Kavya Menon",
+                    "accountNumber": "987654321098",
+                    "bankName": "HDFC",
+                    "ifscCode": "HDFC0002345",
+                    "upiId": "kavya@upi"
+                },
+                "panCard": {
+                    "number": "BCDKM5678S"
+                },
+                "aadharCard": {
+                    "number": "234567890123"
+                },
+                "address": {
+                    "city": "Kochi",
+                    "state": "Kerala",
+                    "pincode": "682001",
+                    "country": "India"
+                },
+                "isKycSubmitted": true,
+                "createdAt": "2026-09-11T16:57:46.010Z",
+                "updatedAt": "2026-09-11T16:57:46.010Z",
+                "__v": 0
+            },
+            {
+                "_id": "6aa4330a342ad6c62d400bf8",
+                "userId": {
+                    "_id": "6aa4330a342ad6c62d400bf6",
+                    "fullName": "Ananya Das",
+                    "phone": "9100000004",
+                    "isOnline": false
+                },
+                "bio": "Young and insightful astrologer specializing in face reading and lal kitab remedies.",
+                "experience": 3,
+                "languages": [
+                    "Bengali",
+                    "Hindi",
+                    "English"
+                ],
+                "specializations": [
+                    "face_reading",
+                    "lal_kitab"
+                ],
+                "chatRate": 10,
+                "callRate": 18,
+                "videoRate": 25,
+                "rating": 4.2,
+                "totalReviews": 62,
+                "totalConsultations": 140,
+                "status": "approved",
+                "isAvailableForChat": true,
+                "isAvailableForCall": false,
+                "isAvailableForVideo": false,
+                "documents": [],
+                "degree": "M.A. Sanskrit",
+                "certificates": [],
+                "bankDetails": {
+                    "accountHolderName": "Ananya Das",
+                    "accountNumber": "223344556677",
+                    "bankName": "Axis",
+                    "ifscCode": "UTIB0004567",
+                    "upiId": "ananya@upi"
+                },
+                "panCard": {
+                    "number": "DEFAD3456U"
+                },
+                "aadharCard": {
+                    "number": "456789012345"
+                },
+                "address": {
+                    "city": "Kolkata",
+                    "state": "West Bengal",
+                    "pincode": "700001",
+                    "country": "India"
+                },
+                "isKycSubmitted": true,
+                "createdAt": "2026-09-11T16:57:46.138Z",
+                "updatedAt": "2026-09-11T16:57:46.138Z",
+                "__v": 0
+            }
         ],
-        "specializations": [
-            "Vedic",
-            "Numerology",
-            "Tarot",
-            "Prashna"
-        ],
-        "chatRate": 20,
-        "callRate": 20,
-        "videoRate": 20,
-        "rating": 0,
-        "totalReviews": 0,
-        "totalConsultations": 0,
-        "status": "pending",
-        "isAvailableForChat": false,
-        "isAvailableForCall": false,
-        "isAvailableForVideo": false,
-        "documents": [],
-        "certificates": [
-            "/uploads/kyc/2a6f22e415131fe24a295965b2c1325f.jpeg"
-        ],
-        "isKycSubmitted": true,
-        "createdAt": "2026-10-31T15:23:06.503Z",
-        "updatedAt": "2026-11-04T03:52:39.782Z",
-        "__v": 0,
-        "aadharCard": {
-            "number": "158888888888",
-            "photo": "/uploads/kyc/ac7688c6ce570cee9852782eb325c308.jpg"
-        },
-        "address": {
-            "city": "Tedt",
-            "state": "Delhi",
-            "pincode": "189888",
-            "country": "Andorra"
-        },
-        "bankDetails": {
-            "accountHolderName": "Ritam",
-            "accountNumber": "4580099998999",
-            "bankName": "Fbfbbb",
-            "ifscCode": "UTIB0000580"
-        },
-        "bio": "Fvfggh",
-        "degree": "test",
-        "displayName": "Dhhb",
-        "dob": "02/11/2026",
-        "gender": "male",
-        "panCard": {
-            "number": "DGFGG1234R",
-            "photo": "/uploads/kyc/6facabf4d432c8ae0c60a771c4693ced.png"
-        },
-        "profilePhoto": "/uploads/kyc/2fb33770ca56652dc44c5921ddcb48d9.jpg",
-        "secondaryContact": "1234567890"
+        "pagination": {
+            "total": 6,
+            "page": 1,
+            "limit": 10,
+            "totalPages": 1,
+            "hasNextPage": false,
+            "hasPrevPage": false
+        }
     },
-    "message": "Profile fetched successfully.",
-    "requestId": "ac3c2d6d-dad9-4a0f-9745-451fc877b457"
-}
-
-
-Patch
-/astrologer/profile
-Berar Token
-
-Body
-{
-  "bio": "Experienced vedic astrologer with 10+ years of practice.",
-  "experience": 10,
-  "chatRate": 20,
-  "callRate": 30,
-  "videoRate": 40,
-  "specializations": ["vedic", "tarot"],
-  "languages": ["Hindi", "English"]
+    "message": "Astrologers fetched successfully.",
+    "requestId": "e5ee92ad-7728-44cb-93b2-432929eed71d"
 }
