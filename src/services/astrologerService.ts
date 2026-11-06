@@ -47,12 +47,16 @@ export const astrologerService = {
   async listAstrologers(
     filter: AstrologerFilter = {},
     page = 1,
+    limit = 10,
   ): Promise<AstrologerListResponse> {
-    const {data} = await apiClient.get<AstrologerListResponse>(
+    const {data: response} = await apiClient.get<AstrologerListResponse>(
       Endpoints.astrologers.list,
-      {params: {...filter, page}},
+      {params: {...filter, page, limit}},
     );
-    return data;
+    if (!response.success) {
+      throw new Error(response.message || 'Could not load astrologers.');
+    }
+    return response;
   },
 
   async getAstrologer(id: string): Promise<Astrologer> {

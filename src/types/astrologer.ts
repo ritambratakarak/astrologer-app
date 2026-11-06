@@ -28,9 +28,47 @@ export interface AstrologerReview {
 }
 
 export interface AstrologerListResponse {
-  astrologers: Astrologer[];
+  status: number;
+  success: boolean;
+  data: {
+    items: AstrologerListItem[];
+    pagination: AstrologerPagination;
+  };
+  message: string;
+  requestId: string;
+}
+
+export interface AstrologerListItem {
+  _id: string;
+  userId: {
+    _id: string;
+    fullName: string;
+    phone: string;
+    isOnline: boolean;
+  };
+  bio: string;
+  experience: number;
+  languages: string[];
+  specializations: string[];
+  chatRate: number;
+  callRate: number;
+  videoRate: number;
+  rating: number;
+  totalReviews: number;
+  totalConsultations: number;
+  status: string;
+  isAvailableForChat: boolean;
+  isAvailableForCall: boolean;
+  isAvailableForVideo: boolean;
+}
+
+export interface AstrologerPagination {
   total: number;
   page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 
 export interface AstrologerFilter {

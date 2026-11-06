@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   View,
   Text,
   TextInput,
@@ -13,28 +14,97 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Colors} from '../../theme/colors';
 import Chip from '../../components/common/Chip';
 import type {CustomerStackParamList} from '../../navigation/types';
+import {astrologerService} from '../../services/astrologerService';
+import type {
+  AstrologerFilter,
+  AstrologerListItem,
+  AstrologerPagination,
+} from '../../types/astrologer';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
 
 const FILTERS = ['All', 'Online', 'Chat', 'Call', 'Vedic', 'Tarot', 'Numerology', 'Vastu'];
+const PAGE_SIZE = 10;
 
-const ASTROLOGERS = [
-  {id: '1', name: 'Pandit Ramesh Kumar', spec: 'Vedic · Kundali · Lal Kitab', emoji: '🧙', rating: '4.9', reviews: 124, exp: 15, chatRate: 20, callRate: 30, videoRate: 40, online: true},
-  {id: '2', name: 'Meera Joshi', spec: 'Tarot · Numerology · Face Reading', emoji: '🌙', rating: '4.7', reviews: 89, exp: 8, chatRate: 15, callRate: 25, videoRate: 0, online: true},
-  {id: '3', name: 'Acharya Suresh Verma', spec: 'Vastu · Palmistry · Muhurta', emoji: '⭐', rating: '4.8', reviews: 210, exp: 22, chatRate: 25, callRate: 35, videoRate: 0, online: false},
-  {id: '4', name: 'Divya Nair', spec: 'Lal Kitab · Prashna · Kundali', emoji: '🌟', rating: '4.6', reviews: 67, exp: 10, chatRate: 18, callRate: 28, videoRate: 38, online: true},
-  {id: '5', name: 'Rajesh Sharma', spec: 'Numerology · Vastu · Vedic', emoji: '🔮', rating: '4.9', reviews: 312, exp: 18, chatRate: 22, callRate: 32, videoRate: 0, online: true},
-];
+function getFilter(search: string, activeFilter: string): AstrologerFilter {
+  const filter: AstrologerFilter = {};
+  const normalizedSearch = search.trim();
+  if (normalizedSearch) {
+    filter.search = normalizedSearch;
+  }
+
+  if (activeFilter === 'Online') {
+    filter.onlineOnly = true;
+  } else if (activeFilter === 'Chat' || activeFilter === 'Call') {
+    filter.type = activeFilter === 'Chat' ? 'chat' : 'call';
+  } else if (activeFilter !== 'All') {
+    filter.specialization = activeFilter.toLowerCase();
+  }
+  return filter;
+}
+
+function getSpecializationLabel(specialization: string): string {
+  return specialization
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 export default function BrowseScreen() {
   const navigation = useNavigation<Nav>();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [astrologers, setAstrologers] = useState<AstrologerListItem[]>([]);
+  const [pagination, setPagination] = useState<AstrologerPagination | null>(null);
+  const [page, setPage] = useState(1);
+  const [reloadVersion, setReloadVersion] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = ASTROLOGERS.filter(a =>
-    a.name.toLowerCase().includes(search.toLowerCase()) ||
-    a.spec.toLowerCase().includes(search.toLowerCase()),
-  );
+  useEffect(() => {
+    let isActive = true;
+    const timeout = setTimeout(() => {
+      setLoading(true);
+      setError(null);
+      astrologerService
+        .listAstrologers(getFilter(search, activeFilter), page, PAGE_SIZE)
+        .then(response => {
+          if (isActive) {
+            setAstrologers(response.data.items);
+            setPagination(response.data.pagination);
+          }
+        })
+        .catch(loadError => {
+          if (isActive) {
+            setError(
+              loadError instanceof Error
+                ? loadError.message
+                : 'Could not load astrologers. Please try again.',
+            );
+          }
+        })
+        .finally(() => {
+          if (isActive) {
+            setLoading(false);
+          }
+        });
+    }, search ? 300 : 0);
+
+    return () => {
+      isActive = false;
+      clearTimeout(timeout);
+    };
+  }, [activeFilter, page, reloadVersion, search]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    setPage(1);
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -49,7 +119,7 @@ export default function BrowseScreen() {
           placeholder="Search by name, specialty..."
           placeholderTextColor={Colors.t3}
           value={search}
-          onChangeText={setSearch}
+          onChangeText={handleSearchChange}
         />
       </View>
 
@@ -61,7 +131,7 @@ export default function BrowseScreen() {
           <TouchableOpacity
             key={f}
             style={[styles.fChip, activeFilter === f && styles.fChipActive]}
-            onPress={() => setActiveFilter(f)}>
+            onPress={() => handleFilterChange(f)}>
             <Text style={[styles.fChipText, activeFilter === f && styles.fChipTextActive]}>
               {f}
             </Text>
@@ -69,39 +139,112 @@ export default function BrowseScreen() {
         ))}
       </ScrollView>
 
-      <Text style={styles.resultCount}>{filtered.length} astrologers found</Text>
+      <Text style={styles.resultCount}>
+        {pagination
+          ? `${pagination.total} astrologers found`
+          : 'Browse available astrologers'}
+      </Text>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {filtered.map(a => (
-          <TouchableOpacity
-            key={a.id}
-            style={styles.item}
-            onPress={() => navigation.navigate('AstrologerDetail', {astrologerId: a.id})}>
-            <View style={styles.itemAv}>
-              <Text style={{fontSize: 20}}>{a.emoji}</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>{a.name}</Text>
-              <Text style={styles.itemSpec}>{a.spec}</Text>
-              <View style={styles.itemMeta}>
-                <Text style={styles.stars}>★★★★★</Text>
-                <Text style={styles.ratingText}>{a.rating} ({a.reviews}) · {a.exp} yrs</Text>
+        {astrologers.map(a => {
+          const name = a.userId.fullName;
+          const specializations = a.specializations
+            .map(getSpecializationLabel)
+            .join(' · ');
+          return (
+            <TouchableOpacity
+              key={a._id}
+              style={styles.item}
+              onPress={() =>
+                navigation.navigate('AstrologerDetail', {astrologerId: a._id})
+              }>
+              <View style={styles.itemAv}>
+                <Text style={styles.initial}>{name.charAt(0).toUpperCase()}</Text>
               </View>
-              <View style={styles.itemChips}>
-                <Chip label={`💬 ₹${a.chatRate}/m`} variant="green" small />
-                <Chip label={`📞 ₹${a.callRate}/m`} variant="blue" small />
-                {a.videoRate > 0 && <Chip label={`📹 ₹${a.videoRate}/m`} variant="purple" small />}
+              <View style={styles.itemInfo}>
+                <Text style={styles.itemName}>{name}</Text>
+                <Text style={styles.itemSpec}>{specializations}</Text>
+                <View style={styles.itemMeta}>
+                  <Text style={styles.stars}>★★★★★</Text>
+                  <Text style={styles.ratingText}>
+                    {a.rating.toFixed(1)} ({a.totalReviews}) · {a.experience} yrs
+                  </Text>
+                </View>
+                <View style={styles.itemChips}>
+                  <Chip label={`💬 ₹${a.chatRate}/m`} variant="green" small />
+                  <Chip label={`📞 ₹${a.callRate}/m`} variant="blue" small />
+                  {a.videoRate > 0 && (
+                    <Chip label={`📹 ₹${a.videoRate}/m`} variant="purple" small />
+                  )}
+                </View>
               </View>
-            </View>
-            <View style={styles.avail}>
-              <View style={[styles.dot, {backgroundColor: a.online ? Colors.green : Colors.t2}]} />
-              <Text style={[styles.availText, {color: a.online ? Colors.green : Colors.t2}]}>
-                {a.online ? 'Online' : 'Offline'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-        <View style={{height: 90}} />
+              <View style={styles.avail}>
+                <View
+                  style={[
+                    styles.dot,
+                    {backgroundColor: a.userId.isOnline ? Colors.green : Colors.t2},
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.availText,
+                    {color: a.userId.isOnline ? Colors.green : Colors.t2},
+                  ]}>
+                  {a.userId.isOnline ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+        {loading && (
+          <View style={styles.state}>
+            <ActivityIndicator color={Colors.gold} />
+            <Text style={styles.stateText}>Loading astrologers...</Text>
+          </View>
+        )}
+        {!loading && error && (
+          <View style={styles.state}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => setReloadVersion(version => version + 1)}>
+              <Text style={styles.retryText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {!loading && !error && astrologers.length === 0 && (
+          <View style={styles.state}>
+            <Text style={styles.stateText}>No astrologers found.</Text>
+          </View>
+        )}
+        {pagination && pagination.totalPages > 0 && (
+          <View style={styles.pagination}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              disabled={!pagination.hasPrevPage || loading}
+              style={[
+                styles.pageButton,
+                (!pagination.hasPrevPage || loading) && styles.pageButtonDisabled,
+              ]}
+              onPress={() => setPage(currentPage => Math.max(1, currentPage - 1))}>
+              <Text style={styles.pageButtonText}>Previous</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageText}>
+              Page {pagination.page} of {pagination.totalPages}
+            </Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              disabled={!pagination.hasNextPage || loading}
+              style={[
+                styles.pageButton,
+                (!pagination.hasNextPage || loading) && styles.pageButtonDisabled,
+              ]}
+              onPress={() => setPage(currentPage => currentPage + 1)}>
+              <Text style={styles.pageButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={styles.scrollBottomSpace} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -159,6 +302,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  initial: {fontSize: 20, fontWeight: '700', color: Colors.gold},
   itemInfo: {flex: 1},
   itemName: {fontSize: 15, fontWeight: '700', color: Colors.text},
   itemSpec: {fontSize: 11, color: Colors.t2, marginTop: 2},
@@ -169,4 +313,33 @@ const styles = StyleSheet.create({
   avail: {alignItems: 'flex-end', gap: 4},
   dot: {width: 8, height: 8, borderRadius: 4},
   availText: {fontSize: 9},
+  state: {alignItems: 'center', paddingHorizontal: 20, paddingVertical: 24, gap: 10},
+  stateText: {fontSize: 12, color: Colors.t2},
+  errorText: {fontSize: 12, color: Colors.red, textAlign: 'center'},
+  retryButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: Colors.goldDim,
+  },
+  retryText: {fontSize: 12, fontWeight: '600', color: Colors.gold},
+  pagination: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  pageButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border2,
+  },
+  pageButtonDisabled: {opacity: 0.4},
+  pageButtonText: {fontSize: 11, fontWeight: '600', color: Colors.gold},
+  pageText: {fontSize: 11, color: Colors.t2},
+  scrollBottomSpace: {height: 90},
 });
