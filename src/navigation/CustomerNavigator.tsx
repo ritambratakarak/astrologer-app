@@ -74,7 +74,7 @@ function CustomerTabs() {
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="ConsultTab"
         component={BrowseScreen}
         options={{
@@ -82,7 +82,7 @@ function CustomerTabs() {
             <TabIcon emoji="💬" label="Consult" focused={focused} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="WalletTab"
         component={CustomerWalletScreen}
