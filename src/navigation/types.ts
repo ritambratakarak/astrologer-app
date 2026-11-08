@@ -26,7 +26,7 @@ export type CustomerTabParamList = {
 // ─── Customer Stack (wraps tabs + detail screens) ─────────────────────────────
 export type CustomerStackParamList = {
   CustomerTabs: undefined;
-  AstrologerDetail: {astrologerId: string};
+  AstrologerDetail: {astrologerUserId: string};
   Book: {
     astrologerId: string;
     astrologerName: string;

@@ -1,7 +1,8 @@
 import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import type {
-  Astrologer,
+  AstrologerDetail,
+  AstrologerDetailApiResponse,
   AstrologerListResponse,
   AstrologerFilter,
   AstrologerReview,
@@ -59,11 +60,14 @@ export const astrologerService = {
     return response;
   },
 
-  async getAstrologer(id: string): Promise<Astrologer> {
-    const {data} = await apiClient.get<Astrologer>(
+  async getAstrologer(id: string): Promise<AstrologerDetail> {
+    const {data: response} = await apiClient.get<AstrologerDetailApiResponse>(
       Endpoints.astrologers.detail(id),
     );
-    return data;
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Could not load astrologer details.');
+    }
+    return response.data;
   },
 
   async getAstrologerReviews(

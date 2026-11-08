@@ -161,7 +161,7 @@ export default function BrowseScreen() {
               key={a._id}
               style={styles.item}
               onPress={() =>
-                navigation.navigate('AstrologerDetail', {astrologerId: a._id})
+                navigation.navigate('AstrologerDetail', {astrologerUserId: a.userId})
               }>
               <View style={styles.itemAv}>
                 <Text style={styles.initial}>{name.charAt(0).toUpperCase()}</Text>

@@ -1,5 +1,12 @@
-import React, {useState} from 'react';
-import {View, Text, ScrollView, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
@@ -8,43 +15,133 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import type {CustomerScreenProps} from '../../navigation/types';
 import type {ConsultationType} from '../../types/consultation';
+import {astrologerService} from '../../services/astrologerService';
+import type {AstrologerDetail} from '../../types/astrologer';
 
-const DEMO = {
-  name: 'Pandit Ramesh Kumar',
-  spec: 'Vedic Astrology · Kundali · Lal Kitab',
-  emoji: '🧙',
-  rating: '4.9',
-  reviews: 124,
-  satisfaction: 98,
-  sessions: 580,
-  exp: 15,
-  languages: ['Hindi', 'English', 'Sanskrit'],
-  specializations: ['Vedic', 'Kundali', 'Lal Kitab', 'Muhurta'],
-  bio: 'With 15+ years of deep Vedic astrology experience, Pandit Ramesh provides precise birth chart readings, kundali matching, and muhurta selection.',
-  chatRate: 20,
-  callRate: 30,
-  videoRate: 40,
-  chatEnabled: true,
-  callEnabled: true,
-  videoEnabled: true,
-  isOnline: true,
-};
-
-const RATE_OPTIONS: {type: ConsultationType; icon: string; label: string; key: 'chatRate' | 'callRate' | 'videoRate'}[] = [
-  {type: 'chat', icon: '💬', label: 'CHAT', key: 'chatRate'},
-  {type: 'call', icon: '📞', label: 'CALL', key: 'callRate'},
-  {type: 'video', icon: '📹', label: 'VIDEO', key: 'videoRate'},
+const RATE_OPTIONS: {
+  type: ConsultationType;
+  icon: string;
+  label: string;
+  rateKey: 'chatRate' | 'callRate' | 'videoRate';
+  availableKey:
+    | 'isAvailableForChat'
+    | 'isAvailableForCall'
+    | 'isAvailableForVideo';
+}[] = [
+  {
+    type: 'chat',
+    icon: '💬',
+    label: 'CHAT',
+    rateKey: 'chatRate',
+    availableKey: 'isAvailableForChat',
+  },
+  {
+    type: 'call',
+    icon: '📞',
+    label: 'CALL',
+    rateKey: 'callRate',
+    availableKey: 'isAvailableForCall',
+  },
+  {
+    type: 'video',
+    icon: '📹',
+    label: 'VIDEO',
+    rateKey: 'videoRate',
+    availableKey: 'isAvailableForVideo',
+  },
 ];
 
-const REVIEWS = [
-  {name: 'Priya S.', stars: '★★★★★', comment: 'Excellent! Very accurate predictions about my career change.', ago: '3 days ago'},
-  {name: 'Rahul M.', stars: '★★★★☆', comment: 'Very knowledgeable and patient. Explained everything clearly.', ago: '1 week ago'},
-];
+function getSpecializationLabel(specialization: string): string {
+  return specialization
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 export default function AstrologerDetailScreen({navigation, route}: CustomerScreenProps<'AstrologerDetail'>) {
   const [selectedType, setSelectedType] = useState<ConsultationType>('chat');
+  const [astrologer, setAstrologer] = useState<AstrologerDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryVersion, setRetryVersion] = useState(0);
   const walletBalance = 250;
-  const ratePerMin = selectedType === 'chat' ? DEMO.chatRate : selectedType === 'call' ? DEMO.callRate : DEMO.videoRate;
+
+  useEffect(() => {
+    let isActive = true;
+    setLoading(true);
+    setError(null);
+    astrologerService
+      .getAstrologer(route.params.astrologerUserId)
+      .then(profile => {
+        if (isActive) {
+          setAstrologer(profile);
+          const firstAvailable = RATE_OPTIONS.find(option => profile[option.availableKey]);
+          if (firstAvailable) {
+            setSelectedType(firstAvailable.type);
+          }
+        }
+      })
+      .catch(loadError => {
+        if (isActive) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Could not load astrologer details.',
+          );
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [retryVersion, route.params.astrologerUserId]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <AppHeader onBack={() => navigation.goBack()} />
+        <View style={styles.state}>
+          <ActivityIndicator color={Colors.gold} />
+          <Text style={styles.stateText}>Loading astrologer details...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !astrologer) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <AppHeader onBack={() => navigation.goBack()} />
+        <View style={styles.state}>
+          <Text style={styles.errorText}>
+            {error ?? 'Could not load astrologer details.'}
+          </Text>
+          <Button
+            label="Retry"
+            small
+            onPress={() => setRetryVersion(version => version + 1)}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const name = astrologer.userId.fullName;
+  const specializations = astrologer.specializations
+    .map(getSpecializationLabel)
+    .join(' · ');
+  const ratePerMin = astrologer[selectedType === 'chat' ? 'chatRate' : selectedType === 'call' ? 'callRate' : 'videoRate'];
+  const selectedAvailabilityKey = RATE_OPTIONS.find(
+    option => option.type === selectedType,
+  )?.availableKey;
+  const selectedAvailable = selectedAvailabilityKey
+    ? astrologer[selectedAvailabilityKey]
+    : false;
   const minsAvailable = Math.floor(walletBalance / ratePerMin);
 
   return (
@@ -54,19 +151,23 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
 
         {/* Hero */}
         <View style={styles.hero}>
-          <View style={styles.heroAv}><Text style={{fontSize: 36}}>{DEMO.emoji}</Text></View>
-          <Text style={styles.heroName}>{DEMO.name}</Text>
-          <Text style={styles.heroSpec}>{DEMO.spec}</Text>
+          <View style={styles.heroAv}>
+            <Text style={{fontSize: 36}}>{name.charAt(0).toUpperCase()}</Text>
+          </View>
+          <Text style={styles.heroName}>{name}</Text>
+          <Text style={styles.heroSpec}>{specializations}</Text>
           <View style={styles.heroChips}>
-            <Chip label="💬 Online" variant="green" />
-            <Chip label={`⭐ ${DEMO.rating} Rating`} variant="gold" />
-            <Chip label={`${DEMO.exp} yrs exp`} />
+            <Chip
+              label={astrologer.userId.isOnline ? 'Online' : 'Offline'}
+              variant={astrologer.userId.isOnline ? 'green' : 'blue'}
+            />
+            <Chip label={`⭐ ${astrologer.rating.toFixed(1)} Rating`} variant="gold" />
+            <Chip label={`${astrologer.experience} yrs exp`} />
           </View>
           <View style={styles.stats}>
             {[
-              {val: DEMO.reviews, label: 'Reviews'},
-              {val: `${DEMO.satisfaction}%`, label: 'Satisfied'},
-              {val: `${DEMO.sessions}+`, label: 'Sessions'},
+              {val: astrologer.totalReviews, label: 'Reviews'},
+              {val: astrologer.totalConsultations, label: 'Sessions'},
             ].map(s => (
               <View key={s.label} style={styles.statItem}>
                 <Text style={styles.statVal}>{s.val}</Text>
@@ -82,11 +183,19 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
           {RATE_OPTIONS.map(r => (
             <TouchableOpacity
               key={r.type}
-              style={[styles.rateItem, selectedType === r.type && styles.rateItemSel]}
+              disabled={!astrologer[r.availableKey]}
+              style={[
+                styles.rateItem,
+                selectedType === r.type && styles.rateItemSel,
+                !astrologer[r.availableKey] && styles.rateItemDisabled,
+              ]}
               onPress={() => setSelectedType(r.type)}>
               <Text style={styles.rateIcon}>{r.icon}</Text>
               <Text style={styles.rateType}>{r.label}</Text>
-              <Text style={styles.rateVal}>₹{DEMO[r.key]}/min</Text>
+              <Text style={styles.rateVal}>₹{astrologer[r.rateKey]}/min</Text>
+              <Text style={styles.rateAvailability}>
+                {astrologer[r.availableKey] ? 'Available' : 'Unavailable'}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -96,35 +205,23 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
           <Card variant="gold">
             <Text style={styles.cardLabel}>LANGUAGES</Text>
             <View style={styles.chipRow}>
-              {DEMO.languages.map(l => <Chip key={l} label={l} />)}
+              {astrologer.languages.map(l => <Chip key={l} label={l} />)}
             </View>
             <View style={styles.divider} />
             <Text style={styles.cardLabel}>SPECIALIZATIONS</Text>
             <View style={styles.chipRow}>
-              {DEMO.specializations.map(s => <Chip key={s} label={s} variant="gold" />)}
+              {astrologer.specializations.map(s => (
+                <Chip key={s} label={getSpecializationLabel(s)} variant="gold" />
+              ))}
             </View>
             <View style={styles.divider} />
-            <Text style={styles.bioText}>{DEMO.bio}</Text>
+            <Text style={styles.bioText}>{astrologer.bio}</Text>
           </Card>
         </View>
 
-        {/* Reviews */}
         <View style={styles.sectionHdr}>
-          <Text style={styles.secTitle}>Recent Reviews</Text>
-          <Text style={styles.seeAll}>All {DEMO.reviews}</Text>
-        </View>
-        <View style={{paddingHorizontal: 20, marginBottom: 16}}>
-          {REVIEWS.map((r, i) => (
-            <View key={i} style={[styles.reviewItem, i > 0 && {marginTop: 8}]}>
-              <View style={styles.reviewAv}><Text style={{fontSize: 14}}>{r.name[0]}</Text></View>
-              <View style={{flex: 1}}>
-                <Text style={styles.reviewName}>{r.name}</Text>
-                <Text style={styles.reviewStars}>{r.stars}</Text>
-                <Text style={styles.reviewComment}>{r.comment}</Text>
-                <Text style={styles.reviewAgo}>{r.ago}</Text>
-              </View>
-            </View>
-          ))}
+          <Text style={styles.secTitle}>Reviews</Text>
+          <Text style={styles.seeAll}>{astrologer.totalReviews} total</Text>
         </View>
 
         {/* Warning + CTA */}
@@ -137,17 +234,18 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
           </View>
           <Button
             label="Book Consultation →"
+            disabled={!selectedAvailable}
             onPress={() =>
               navigation.navigate('Book', {
-                astrologerId: route.params.astrologerId,
-                astrologerName: DEMO.name,
-                chatRate: DEMO.chatRate,
-                callRate: DEMO.callRate,
-                videoRate: DEMO.videoRate,
-                chatEnabled: DEMO.chatEnabled,
-                callEnabled: DEMO.callEnabled,
-                videoEnabled: DEMO.videoEnabled,
-                isOnline: DEMO.isOnline,
+                astrologerId: astrologer._id,
+                astrologerName: name,
+                chatRate: astrologer.chatRate,
+                callRate: astrologer.callRate,
+                videoRate: astrologer.videoRate,
+                chatEnabled: astrologer.isAvailableForChat,
+                callEnabled: astrologer.isAvailableForCall,
+                videoEnabled: astrologer.isAvailableForVideo,
+                isOnline: astrologer.userId.isOnline,
               })
             }
           />
@@ -159,6 +257,9 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
 
 const styles = StyleSheet.create({
   safe: {flex: 1, backgroundColor: Colors.bg},
+  state: {flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12},
+  stateText: {fontSize: 13, color: Colors.t2},
+  errorText: {fontSize: 13, color: Colors.red, textAlign: 'center'},
   hero: {paddingHorizontal: 20, paddingBottom: 20, alignItems: 'center', backgroundColor: 'rgba(30,18,96,0.5)'},
   heroAv: {width: 90, height: 90, borderRadius: 45, backgroundColor: Colors.card2, alignItems: 'center', justifyContent: 'center', marginBottom: 12, borderWidth: 2, borderColor: Colors.border},
   heroName: {fontSize: 22, fontWeight: '800', color: Colors.text},
@@ -174,19 +275,15 @@ const styles = StyleSheet.create({
   rateGrid: {flexDirection: 'row', gap: 8, paddingHorizontal: 20, marginBottom: 16},
   rateItem: {flex: 1, backgroundColor: Colors.card, borderWidth: 1.5, borderColor: Colors.border2, borderRadius: 12, padding: 12, alignItems: 'center'},
   rateItemSel: {borderColor: Colors.gold, backgroundColor: Colors.goldDim},
+  rateItemDisabled: {opacity: 0.45},
   rateIcon: {fontSize: 20, marginBottom: 4},
   rateType: {fontSize: 10, color: Colors.t2, fontWeight: '600'},
   rateVal: {fontSize: 13, fontWeight: '700', color: Colors.gold, marginTop: 3},
+  rateAvailability: {fontSize: 9, color: Colors.t3, marginTop: 3},
   cardLabel: {fontSize: 11, fontWeight: '700', color: Colors.gold, marginBottom: 6},
   chipRow: {flexDirection: 'row', gap: 6, flexWrap: 'wrap'},
   divider: {height: 1, backgroundColor: Colors.border2, marginVertical: 14},
   bioText: {fontSize: 13, color: Colors.t2, lineHeight: 22},
-  reviewItem: {flexDirection: 'row', gap: 10, padding: 12, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border2, borderRadius: 12},
-  reviewAv: {width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.card2, alignItems: 'center', justifyContent: 'center'},
-  reviewName: {fontSize: 12, fontWeight: '700', color: Colors.text},
-  reviewStars: {color: Colors.gold, fontSize: 11},
-  reviewComment: {fontSize: 12, color: Colors.t2, marginTop: 4, lineHeight: 18},
-  reviewAgo: {fontSize: 10, color: Colors.t3, marginTop: 4},
   warningBox: {backgroundColor: Colors.redDim, borderWidth: 1, borderColor: 'rgba(248,113,113,0.2)', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14},
   warningText: {fontSize: 12, color: Colors.red, flex: 1},
 });

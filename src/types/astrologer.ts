@@ -59,6 +59,37 @@ export interface AstrologerListItem {
   isAvailableForVideo: boolean;
 }
 
+export interface AstrologerDetail {
+  _id: string;
+  userId: {
+    _id: string;
+    fullName: string;
+    isOnline: boolean;
+  };
+  bio: string;
+  experience: number;
+  languages: string[];
+  specializations: string[];
+  chatRate: number;
+  callRate: number;
+  videoRate: number;
+  rating: number;
+  totalReviews: number;
+  totalConsultations: number;
+  status: string;
+  isAvailableForChat: boolean;
+  isAvailableForCall: boolean;
+  isAvailableForVideo: boolean;
+}
+
+export interface AstrologerDetailApiResponse {
+  status: number;
+  success: boolean;
+  data: AstrologerDetail;
+  message: string;
+  requestId: string;
+}
+
 export interface AstrologerPagination {
   total: number;
   page: number;

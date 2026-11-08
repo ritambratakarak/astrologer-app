@@ -1,5 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {
+  ActivityIndicator,
   View,
   Text,
   ScrollView,
@@ -14,15 +15,10 @@ import Chip from '../../components/common/Chip';
 import {tokenManager} from '../../security/tokenManager';
 import type {CustomerStackParamList} from '../../navigation/types';
 import {walletService} from '../../services/walletService';
+import {astrologerService} from '../../services/astrologerService';
+import type {AstrologerListItem} from '../../types/astrologer';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
-
-const TOP_ASTROLOGERS = [
-  {id: '1', name: 'Pandit Ramesh', spec: 'Vedic · Kundali', rate: '₹20/min chat', emoji: '🧙', online: true, stars: '★★★★★'},
-  {id: '2', name: 'Meera Joshi', spec: 'Tarot · Numerology', rate: '₹15/min chat', emoji: '🌙', online: true, stars: '★★★★☆'},
-  {id: '3', name: 'Acharya Suresh', spec: 'Vastu · Palmistry', rate: '₹25/min call', emoji: '⭐', online: false, stars: '★★★★★'},
-  {id: '4', name: 'Divya Nair', spec: 'Lal Kitab · Prashna', rate: '₹18/min chat', emoji: '🌟', online: true, stars: '★★★★☆'},
-];
 
 const RECENT = [
   {astrologer: 'Pandit Ramesh', emoji: '🧙', detail: 'Chat · 24 mins · ₹480'},
@@ -34,6 +30,9 @@ export default function CustomerHomeScreen() {
   const name = tokenManager.getUserName() ?? '';
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [walletError, setWalletError] = useState<string | null>(null);
+  const [astrologers, setAstrologers] = useState<AstrologerListItem[]>([]);
+  const [astrologersLoading, setAstrologersLoading] = useState(true);
+  const [astrologersError, setAstrologersError] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -53,6 +52,39 @@ export default function CustomerHomeScreen() {
                 ? loadError.message
                 : 'Could not load wallet balance.',
             );
+          }
+        });
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      setAstrologersLoading(true);
+      setAstrologersError(null);
+      astrologerService
+        .listAstrologers({}, 1, 4)
+        .then(response => {
+          if (isActive) {
+            setAstrologers(response.data.items);
+          }
+        })
+        .catch(loadError => {
+          if (isActive) {
+            setAstrologersError(
+              loadError instanceof Error
+                ? loadError.message
+                : 'Could not load astrologers.',
+            );
+          }
+        })
+        .finally(() => {
+          if (isActive) {
+            setAstrologersLoading(false);
           }
         });
 
@@ -121,23 +153,61 @@ export default function CustomerHomeScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.hscroll}>
-          {TOP_ASTROLOGERS.map(a => (
-            <TouchableOpacity
-              key={a.id}
-              style={styles.astroCard}
-              onPress={() => navigation.navigate('AstrologerDetail', {astrologerId: a.id})}>
-              <View style={styles.acAv}>
-                <Text style={{fontSize: 32}}>{a.emoji}</Text>
-              </View>
-              <Text style={styles.acName}>{a.name}</Text>
-              <Text style={styles.acSpec}>{a.spec}</Text>
-              <View style={styles.acRow}>
-                <Text style={styles.stars}>{a.stars}</Text>
-                <View style={[styles.dot, {backgroundColor: a.online ? Colors.green : Colors.t2}]} />
-              </View>
-              <Text style={styles.acRate}>{a.rate}</Text>
-            </TouchableOpacity>
-          ))}
+          {astrologers.map(a => {
+            const astrologerName = a.user?.fullName || 'Astrologer';
+            const specialization = a.specializations
+              .map(value =>
+                value
+                  .split('_')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' '),
+              )
+              .slice(0, 2)
+              .join(' · ');
+            const rate = a.isAvailableForChat
+              ? `₹${a.chatRate}/min chat`
+              : a.isAvailableForCall
+                ? `₹${a.callRate}/min call`
+                : a.isAvailableForVideo
+                  ? `₹${a.videoRate}/min video`
+                  : 'Currently unavailable';
+
+            return (
+              <TouchableOpacity
+                key={a._id}
+                style={styles.astroCard}
+                onPress={() =>
+                  navigation.navigate('AstrologerDetail', {astrologerUserId: a.userId})
+                }>
+                <View style={styles.acAv}>
+                  <Text style={{fontSize: 32}}>
+                    {astrologerName.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <Text style={styles.acName}>{astrologerName}</Text>
+                <Text style={styles.acSpec}>{specialization}</Text>
+                <View style={styles.acRow}>
+                  <Text style={styles.stars}>★ {a.rating.toFixed(1)}</Text>
+                  <View
+                    style={[
+                      styles.dot,
+                      {backgroundColor: a.user?.isOnline ? Colors.green : Colors.t2},
+                    ]}
+                  />
+                </View>
+                <Text style={styles.acRate}>{rate}</Text>
+              </TouchableOpacity>
+            );
+          })}
+          {astrologersLoading && (
+            <ActivityIndicator color={Colors.gold} style={styles.astroLoading} />
+          )}
+          {!astrologersLoading && astrologersError && (
+            <Text style={styles.astroError}>{astrologersError}</Text>
+          )}
+          {!astrologersLoading && !astrologersError && astrologers.length === 0 && (
+            <Text style={styles.astroError}>No astrologers available.</Text>
+          )}
         </ScrollView>
 
         {/* Recent Consultations */}
@@ -281,6 +351,8 @@ const styles = StyleSheet.create({
   stars: {color: Colors.gold, fontSize: 12},
   dot: {width: 8, height: 8, borderRadius: 4},
   acRate: {fontSize: 11, color: Colors.gold, marginTop: 4, fontWeight: '600'},
+  astroLoading: {padding: 24},
+  astroError: {paddingHorizontal: 20, fontSize: 12, color: Colors.t2},
   recentItem: {
     flexDirection: 'row',
     alignItems: 'center',
