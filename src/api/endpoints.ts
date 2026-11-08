@@ -53,7 +53,7 @@ export const Endpoints = {
 
   // Wallet
   wallet: {
-    balance: '/wallet/balance',
+    balance: '/wallet',
     transactions: '/wallet/transactions',
     recharge: '/wallet/recharge',
     verifyPayment: '/wallet/verify-payment',

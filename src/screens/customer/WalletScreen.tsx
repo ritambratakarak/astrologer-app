@@ -1,12 +1,14 @@
-import React from 'react';
-import {View, Text, ScrollView, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Colors} from '../../theme/colors';
 import AppHeader from '../../components/common/AppHeader';
 import Button from '../../components/common/Button';
 import type {CustomerStackParamList} from '../../navigation/types';
+import {walletService} from '../../services/walletService';
+import type {WalletBalance} from '../../types/wallet';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
 
@@ -20,6 +22,39 @@ const TRANSACTIONS = [
 
 export default function CustomerWalletScreen() {
   const navigation = useNavigation<Nav>();
+  const isFocused = useIsFocused();
+  const [wallet, setWallet] = useState<WalletBalance | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [retryVersion, setRetryVersion] = useState(0);
+
+  useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+
+    let isActive = true;
+    setError(null);
+    walletService
+      .getBalance()
+      .then(balance => {
+        if (isActive) {
+          setWallet(balance);
+        }
+      })
+      .catch(loadError => {
+        if (isActive) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Could not load wallet balance.',
+          );
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [isFocused, retryVersion]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -29,10 +64,33 @@ export default function CustomerWalletScreen() {
         <View style={styles.hero}>
           <Text style={styles.heroLabel}>AVAILABLE BALANCE</Text>
           <Text style={styles.heroAmount}>
-            ₹<Text style={styles.heroNum}>250</Text>
-            <Text style={styles.heroDec}>.00</Text>
+            {wallet ? (
+              <>
+                ₹<Text style={styles.heroNum}>{Math.trunc(wallet.balance)}</Text>
+                <Text style={styles.heroDec}>
+                  .{(wallet.balance % 1).toFixed(2).slice(2)}
+                </Text>
+              </>
+            ) : (
+              '₹—'
+            )}
           </Text>
-          <Text style={styles.heroStat}>Total Spent: ₹2,450 · 18 sessions</Text>
+          {wallet && (
+            <Text style={styles.heroStat}>
+              Total Spent: ₹{wallet.totalSpent.toFixed(2)}
+            </Text>
+          )}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity onPress={() => setRetryVersion(version => version + 1)}>
+                <Text style={styles.retryText}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {!wallet && !error && (
+            <ActivityIndicator color={Colors.gold} style={styles.loader} />
+          )}
         </View>
 
         {/* Actions */}
@@ -83,6 +141,10 @@ const styles = StyleSheet.create({
   heroNum: {fontSize: 42, fontWeight: '800'},
   heroDec: {fontSize: 24, color: 'rgba(255,255,255,0.5)'},
   heroStat: {fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 6},
+  loader: {marginTop: 10},
+  errorContainer: {alignItems: 'center', marginTop: 8},
+  errorText: {fontSize: 11, color: Colors.red, textAlign: 'center'},
+  retryText: {fontSize: 12, fontWeight: '700', color: Colors.gold, marginTop: 6},
   actions: {flexDirection: 'row', gap: 12, paddingHorizontal: 20, marginBottom: 20},
   actionBtn: {flex: 1, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border2, borderRadius: 14, padding: 14, alignItems: 'center'},
   actionIcon: {fontSize: 22, marginBottom: 5},

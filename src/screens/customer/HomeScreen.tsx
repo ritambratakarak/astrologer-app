@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Colors} from '../../theme/colors';
 import Chip from '../../components/common/Chip';
 import {tokenManager} from '../../security/tokenManager';
 import type {CustomerStackParamList} from '../../navigation/types';
+import {walletService} from '../../services/walletService';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
 
@@ -31,6 +32,35 @@ const RECENT = [
 export default function CustomerHomeScreen() {
   const navigation = useNavigation<Nav>();
   const name = tokenManager.getUserName() ?? '';
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [walletError, setWalletError] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      setWalletError(null);
+      walletService
+        .getBalance()
+        .then(wallet => {
+          if (isActive) {
+            setWalletBalance(wallet.balance);
+          }
+        })
+        .catch(loadError => {
+          if (isActive) {
+            setWalletError(
+              loadError instanceof Error
+                ? loadError.message
+                : 'Could not load wallet balance.',
+            );
+          }
+        });
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -57,8 +87,12 @@ export default function CustomerHomeScreen() {
           onPress={() => navigation.navigate('CustomerTabs', {screen: 'WalletTab'} as never)}>
           <View>
             <Text style={styles.wbLabel}>WALLET BALANCE</Text>
-            <Text style={styles.wbAmount}>₹250<Text style={styles.wbDecimal}>.00</Text></Text>
-            <Text style={styles.wbSub}>Tap to manage ›</Text>
+            <Text style={styles.wbAmount}>
+              {walletBalance === null ? 'Loading...' : `₹${walletBalance.toFixed(2)}`}
+            </Text>
+            <Text style={[styles.wbSub, walletError && styles.wbError]}>
+              {walletError ?? 'Tap to manage ›'}
+            </Text>
           </View>
           <TouchableOpacity
             style={styles.rechargeBtn}
@@ -191,6 +225,7 @@ const styles = StyleSheet.create({
   wbAmount: {fontSize: 24, fontWeight: '800', color: Colors.text},
   wbDecimal: {fontSize: 16},
   wbSub: {fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 3},
+  wbError: {color: Colors.red},
   rechargeBtn: {
     backgroundColor: 'rgba(255,255,255,0.12)',
     borderWidth: 1,

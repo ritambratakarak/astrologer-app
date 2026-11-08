@@ -19,9 +19,23 @@ export interface Transaction {
 }
 
 export interface WalletBalance {
+  _id: string;
+  userId: string;
   balance: number;
+  currency: string;
+  totalEarned: number;
   totalSpent: number;
-  totalSessions: number;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface WalletBalanceApiResponse {
+  status: number;
+  success: boolean;
+  data: WalletBalance;
+  message: string;
+  requestId: string;
 }
 
 export interface RechargeRequest {
