@@ -519,3 +519,70 @@ All responses are fully typed with TypeScript interfaces:
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
 
+Get method
+/astrologers/{{astrologer_id}}
+from astrologer list api get the userId and use it  
+
+response
+{
+    "status": 200,
+    "success": true,
+    "data": {
+        "_id": "6aa4330a342ad6c62d400bf1",
+        "userId": {
+            "_id": "6aa4330a342ad6c62d400bef",
+            "fullName": "Suresh Iyer",
+            "phone": "9100000003",
+            "isOnline": false,
+            "createdAt": "2026-09-11T16:57:46.056Z"
+        },
+        "bio": "Vastu consultant and palmist. Helping families design harmonious living spaces for over 12 years.",
+        "experience": 12,
+        "languages": [
+            "Tamil",
+            "English",
+            "Telugu"
+        ],
+        "specializations": [
+            "vastu",
+            "palmistry"
+        ],
+        "chatRate": 25,
+        "callRate": 35,
+        "videoRate": 50,
+        "rating": 4.6,
+        "totalReviews": 187,
+        "totalConsultations": 410,
+        "status": "approved",
+        "isAvailableForChat": true,
+        "isAvailableForCall": true,
+        "isAvailableForVideo": true,
+        "documents": [],
+        "degree": "Vastu Shastra Diploma",
+        "certificates": [],
+        "bankDetails": {
+            "accountHolderName": "Suresh Iyer",
+            "accountNumber": "112233445566",
+            "bankName": "ICICI",
+            "ifscCode": "ICIC0003456"
+        },
+        "panCard": {
+            "number": "CDEFSI9012T"
+        },
+        "aadharCard": {
+            "number": "345678901234"
+        },
+        "address": {
+            "city": "Chennai",
+            "state": "Tamil Nadu",
+            "pincode": "600001",
+            "country": "India"
+        },
+        "isKycSubmitted": true,
+        "createdAt": "2026-09-11T16:57:46.076Z",
+        "updatedAt": "2026-09-11T16:57:46.076Z",
+        "__v": 0
+    },
+    "message": "Profile fetched successfully.",
+    "requestId": "492acd33-ac5e-420a-9f52-bf5ee1e0727e"
+}
