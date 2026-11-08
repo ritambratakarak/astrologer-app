@@ -147,7 +147,11 @@ export default function BrowseScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {astrologers.map(a => {
-          const name = a.userId.fullName;
+          const name =
+            typeof a.userId?.fullName === 'string' && a.userId.fullName.trim()
+              ? a.userId.fullName.trim()
+              : 'Astrologer';
+          const isOnline = a.userId?.isOnline ?? false;
           const specializations = a.specializations
             .map(getSpecializationLabel)
             .join(' · ');
@@ -182,15 +186,15 @@ export default function BrowseScreen() {
                 <View
                   style={[
                     styles.dot,
-                    {backgroundColor: a.userId.isOnline ? Colors.green : Colors.t2},
+                    {backgroundColor: isOnline ? Colors.green : Colors.t2},
                   ]}
                 />
                 <Text
                   style={[
                     styles.availText,
-                    {color: a.userId.isOnline ? Colors.green : Colors.t2},
+                    {color: isOnline ? Colors.green : Colors.t2},
                   ]}>
-                  {a.userId.isOnline ? 'Online' : 'Offline'}
+                  {isOnline ? 'Online' : 'Offline'}
                 </Text>
               </View>
             </TouchableOpacity>
