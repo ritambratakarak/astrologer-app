@@ -40,13 +40,12 @@ export interface AstrologerListResponse {
 
 export interface AstrologerListItem {
   _id: string;
-  userId: {
+  userId: string;
+  user: {
     _id: string;
     fullName: string;
-    phone: string;
     isOnline: boolean;
   };
-  bio: string;
   experience: number;
   languages: string[];
   specializations: string[];
@@ -55,8 +54,6 @@ export interface AstrologerListItem {
   videoRate: number;
   rating: number;
   totalReviews: number;
-  totalConsultations: number;
-  status: string;
   isAvailableForChat: boolean;
   isAvailableForCall: boolean;
   isAvailableForVideo: boolean;

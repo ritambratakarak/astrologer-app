@@ -149,10 +149,10 @@ export default function BrowseScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {astrologers.map(a => {
           const name =
-            typeof a.userId?.fullName === 'string' && a.userId.fullName.trim()
-              ? a.userId.fullName.trim()
+            typeof a.user?.fullName === 'string' && a.user.fullName.trim()
+              ? a.user.fullName.trim()
               : 'Astrologer';
-          const isOnline = a.userId?.isOnline ?? false;
+          const isOnline = a.user?.isOnline ?? false;
           const specializations = a.specializations
             .map(getSpecializationLabel)
             .join(' · ');
