@@ -34,9 +34,9 @@ function getFilter(search: string, activeFilter: string): AstrologerFilter {
   }
 
   if (activeFilter === 'Online') {
-    filter.onlineOnly = true;
+    filter.online = true;
   } else if (activeFilter === 'Chat' || activeFilter === 'Call') {
-    filter.type = activeFilter === 'Chat' ? 'chat' : 'call';
+    filter.availability = activeFilter === 'Chat' ? 'chat' : 'call';
   } else if (activeFilter !== 'All') {
     filter.specialization = activeFilter.toLowerCase();
   }

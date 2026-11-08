@@ -73,9 +73,10 @@ export interface AstrologerPagination {
 
 export interface AstrologerFilter {
   search?: string;
-  type?: 'chat' | 'call' | 'video';
+  availability?: 'chat' | 'call' | 'video';
   specialization?: string;
-  onlineOnly?: boolean;
+  online?: boolean;
+  language?: string;
 }
 
 export interface AstrologerSelfProfile {
