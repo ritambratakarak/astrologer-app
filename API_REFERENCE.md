@@ -530,13 +530,7 @@ Beraer token
         "items": [
             {
                 "_id": "6aa4330a342ad6c62d400bff",
-                "userId": {
-                    "_id": "6aa4330a342ad6c62d400bfd",
-                    "fullName": "Vikram Bhatia",
-                    "phone": "9100000005",
-                    "isOnline": false
-                },
-                "bio": "Prashna astrology expert and muhurta specialist. Answers life questions with pinpoint accuracy.",
+                "userId": "6aa4330a342ad6c62d400bfd",
                 "experience": 20,
                 "languages": [
                     "Hindi",
@@ -553,47 +547,18 @@ Beraer token
                 "videoRate": 60,
                 "rating": 4.9,
                 "totalReviews": 380,
-                "totalConsultations": 920,
-                "status": "approved",
                 "isAvailableForChat": false,
                 "isAvailableForCall": true,
                 "isAvailableForVideo": true,
-                "documents": [],
-                "degree": "Jyotish Visharad",
-                "certificates": [],
-                "bankDetails": {
-                    "accountHolderName": "Vikram Bhatia",
-                    "accountNumber": "334455667788",
-                    "bankName": "PNB",
-                    "ifscCode": "PUNB0005678",
-                    "upiId": "vikram@upi"
-                },
-                "panCard": {
-                    "number": "EFGVB7890V"
-                },
-                "aadharCard": {
-                    "number": "567890123456"
-                },
-                "address": {
-                    "city": "Delhi",
-                    "state": "Delhi",
-                    "pincode": "110001",
-                    "country": "India"
-                },
-                "isKycSubmitted": true,
-                "createdAt": "2026-09-11T16:57:46.200Z",
-                "updatedAt": "2026-09-11T16:57:46.200Z",
-                "__v": 0
+                "user": {
+                    "_id": "6aa4330a342ad6c62d400bfd",
+                    "fullName": "Vikram Bhatia",
+                    "isOnline": false
+                }
             },
             {
                 "_id": "6aa43309342ad6c62d400be3",
-                "userId": {
-                    "_id": "6aa43309342ad6c62d400be1",
-                    "fullName": "Pt. Ramesh Tiwari",
-                    "phone": "9100000001",
-                    "isOnline": false
-                },
-                "bio": "Expert in Vedic astrology with 15 years of experience. Specializes in kundali matching and career guidance.",
+                "userId": "6aa43309342ad6c62d400be1",
                 "experience": 15,
                 "languages": [
                     "Hindi",
@@ -609,47 +574,18 @@ Beraer token
                 "videoRate": 40,
                 "rating": 4.8,
                 "totalReviews": 230,
-                "totalConsultations": 580,
-                "status": "approved",
                 "isAvailableForChat": true,
                 "isAvailableForCall": true,
                 "isAvailableForVideo": false,
-                "documents": [],
-                "degree": "Jyotish Acharya",
-                "certificates": [],
-                "bankDetails": {
-                    "accountHolderName": "Ramesh Tiwari",
-                    "accountNumber": "123456789012",
-                    "bankName": "SBI",
-                    "ifscCode": "SBIN0001234",
-                    "upiId": "ramesh@upi"
-                },
-                "panCard": {
-                    "number": "ABCPT1234R"
-                },
-                "aadharCard": {
-                    "number": "123456789012"
-                },
-                "address": {
-                    "city": "Varanasi",
-                    "state": "Uttar Pradesh",
-                    "pincode": "221001",
-                    "country": "India"
-                },
-                "isKycSubmitted": true,
-                "createdAt": "2026-09-11T16:57:45.939Z",
-                "updatedAt": "2026-09-11T16:57:45.939Z",
-                "__v": 0
+                "user": {
+                    "_id": "6aa43309342ad6c62d400be1",
+                    "fullName": "Pt. Ramesh Tiwari",
+                    "isOnline": false
+                }
             },
             {
                 "_id": "6aa4330a342ad6c62d400c0d",
-                "userId": {
-                    "_id": "6aa4330a342ad6c62d400c0b",
-                    "fullName": "Rajendra Joshi",
-                    "phone": "9100000007",
-                    "isOnline": false
-                },
-                "bio": "Specializes in Kundali analysis for marriage and business compatibility.",
+                "userId": "6aa4330a342ad6c62d400c0b",
                 "experience": 10,
                 "languages": [
                     "Hindi",
@@ -665,47 +601,18 @@ Beraer token
                 "videoRate": 38,
                 "rating": 4.7,
                 "totalReviews": 160,
-                "totalConsultations": 390,
-                "status": "approved",
                 "isAvailableForChat": true,
                 "isAvailableForCall": true,
                 "isAvailableForVideo": false,
-                "documents": [],
-                "degree": "Jyotish Acharya",
-                "certificates": [],
-                "bankDetails": {
-                    "accountHolderName": "Rajendra Joshi",
-                    "accountNumber": "556677889900",
-                    "bankName": "SBI",
-                    "ifscCode": "SBIN0007890",
-                    "upiId": "rajendra@upi"
-                },
-                "panCard": {
-                    "number": "GHIRJ6789X"
-                },
-                "aadharCard": {
-                    "number": "789012345678"
-                },
-                "address": {
-                    "city": "Ahmedabad",
-                    "state": "Gujarat",
-                    "pincode": "380001",
-                    "country": "India"
-                },
-                "isKycSubmitted": true,
-                "createdAt": "2026-09-11T16:57:46.330Z",
-                "updatedAt": "2026-09-11T16:57:46.330Z",
-                "__v": 0
+                "user": {
+                    "_id": "6aa4330a342ad6c62d400c0b",
+                    "fullName": "Rajendra Joshi",
+                    "isOnline": false
+                }
             },
             {
                 "_id": "6aa4330a342ad6c62d400bf1",
-                "userId": {
-                    "_id": "6aa4330a342ad6c62d400bef",
-                    "fullName": "Suresh Iyer",
-                    "phone": "9100000003",
-                    "isOnline": false
-                },
-                "bio": "Vastu consultant and palmist. Helping families design harmonious living spaces for over 12 years.",
+                "userId": "6aa4330a342ad6c62d400bef",
                 "experience": 12,
                 "languages": [
                     "Tamil",
@@ -721,46 +628,18 @@ Beraer token
                 "videoRate": 50,
                 "rating": 4.6,
                 "totalReviews": 187,
-                "totalConsultations": 410,
-                "status": "approved",
                 "isAvailableForChat": true,
                 "isAvailableForCall": true,
                 "isAvailableForVideo": true,
-                "documents": [],
-                "degree": "Vastu Shastra Diploma",
-                "certificates": [],
-                "bankDetails": {
-                    "accountHolderName": "Suresh Iyer",
-                    "accountNumber": "112233445566",
-                    "bankName": "ICICI",
-                    "ifscCode": "ICIC0003456"
-                },
-                "panCard": {
-                    "number": "CDEFSI9012T"
-                },
-                "aadharCard": {
-                    "number": "345678901234"
-                },
-                "address": {
-                    "city": "Chennai",
-                    "state": "Tamil Nadu",
-                    "pincode": "600001",
-                    "country": "India"
-                },
-                "isKycSubmitted": true,
-                "createdAt": "2026-09-11T16:57:46.076Z",
-                "updatedAt": "2026-09-11T16:57:46.076Z",
-                "__v": 0
+                "user": {
+                    "_id": "6aa4330a342ad6c62d400bef",
+                    "fullName": "Suresh Iyer",
+                    "isOnline": false
+                }
             },
             {
                 "_id": "6aa4330a342ad6c62d400bea",
-                "userId": {
-                    "_id": "6aa43309342ad6c62d400be8",
-                    "fullName": "Kavya Menon",
-                    "phone": "9100000002",
-                    "isOnline": false
-                },
-                "bio": "Tarot reader and numerologist with a modern approach to ancient wisdom. 8 years of practice.",
+                "userId": "6aa43309342ad6c62d400be8",
                 "experience": 8,
                 "languages": [
                     "English",
@@ -776,47 +655,18 @@ Beraer token
                 "videoRate": 35,
                 "rating": 4.5,
                 "totalReviews": 145,
-                "totalConsultations": 320,
-                "status": "approved",
                 "isAvailableForChat": true,
                 "isAvailableForCall": false,
                 "isAvailableForVideo": true,
-                "documents": [],
-                "degree": "B.A. Psychology",
-                "certificates": [],
-                "bankDetails": {
-                    "accountHolderName": "Kavya Menon",
-                    "accountNumber": "987654321098",
-                    "bankName": "HDFC",
-                    "ifscCode": "HDFC0002345",
-                    "upiId": "kavya@upi"
-                },
-                "panCard": {
-                    "number": "BCDKM5678S"
-                },
-                "aadharCard": {
-                    "number": "234567890123"
-                },
-                "address": {
-                    "city": "Kochi",
-                    "state": "Kerala",
-                    "pincode": "682001",
-                    "country": "India"
-                },
-                "isKycSubmitted": true,
-                "createdAt": "2026-09-11T16:57:46.010Z",
-                "updatedAt": "2026-09-11T16:57:46.010Z",
-                "__v": 0
+                "user": {
+                    "_id": "6aa43309342ad6c62d400be8",
+                    "fullName": "Kavya Menon",
+                    "isOnline": false
+                }
             },
             {
                 "_id": "6aa4330a342ad6c62d400bf8",
-                "userId": {
-                    "_id": "6aa4330a342ad6c62d400bf6",
-                    "fullName": "Ananya Das",
-                    "phone": "9100000004",
-                    "isOnline": false
-                },
-                "bio": "Young and insightful astrologer specializing in face reading and lal kitab remedies.",
+                "userId": "6aa4330a342ad6c62d400bf6",
                 "experience": 3,
                 "languages": [
                     "Bengali",
@@ -832,37 +682,14 @@ Beraer token
                 "videoRate": 25,
                 "rating": 4.2,
                 "totalReviews": 62,
-                "totalConsultations": 140,
-                "status": "approved",
                 "isAvailableForChat": true,
                 "isAvailableForCall": false,
                 "isAvailableForVideo": false,
-                "documents": [],
-                "degree": "M.A. Sanskrit",
-                "certificates": [],
-                "bankDetails": {
-                    "accountHolderName": "Ananya Das",
-                    "accountNumber": "223344556677",
-                    "bankName": "Axis",
-                    "ifscCode": "UTIB0004567",
-                    "upiId": "ananya@upi"
-                },
-                "panCard": {
-                    "number": "DEFAD3456U"
-                },
-                "aadharCard": {
-                    "number": "456789012345"
-                },
-                "address": {
-                    "city": "Kolkata",
-                    "state": "West Bengal",
-                    "pincode": "700001",
-                    "country": "India"
-                },
-                "isKycSubmitted": true,
-                "createdAt": "2026-09-11T16:57:46.138Z",
-                "updatedAt": "2026-09-11T16:57:46.138Z",
-                "__v": 0
+                "user": {
+                    "_id": "6aa4330a342ad6c62d400bf6",
+                    "fullName": "Ananya Das",
+                    "isOnline": false
+                }
             }
         ],
         "pagination": {
@@ -875,5 +702,5 @@ Beraer token
         }
     },
     "message": "Astrologers fetched successfully.",
-    "requestId": "e5ee92ad-7728-44cb-93b2-432929eed71d"
+    "requestId": "38875598-d0f1-4edb-9715-55aebfa8e582"
 }
