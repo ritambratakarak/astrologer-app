@@ -17,6 +17,7 @@ import type {CustomerScreenProps} from '../../navigation/types';
 import type {ConsultationType} from '../../types/consultation';
 import {astrologerService} from '../../services/astrologerService';
 import type {AstrologerDetail} from '../../types/astrologer';
+import {walletService} from '../../services/walletService';
 
 const RATE_OPTIONS: {
   type: ConsultationType;
@@ -64,7 +65,9 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryVersion, setRetryVersion] = useState(0);
-  const walletBalance = 250;
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [walletError, setWalletError] = useState<string | null>(null);
+  const [walletRetryVersion, setWalletRetryVersion] = useState(0);
 
   useEffect(() => {
     let isActive = true;
@@ -100,6 +103,31 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
       isActive = false;
     };
   }, [retryVersion, route.params.astrologerUserId]);
+
+  useEffect(() => {
+    let isActive = true;
+    setWalletError(null);
+    walletService
+      .getBalance()
+      .then(wallet => {
+        if (isActive) {
+          setWalletBalance(wallet.balance);
+        }
+      })
+      .catch(loadError => {
+        if (isActive) {
+          setWalletError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Could not load wallet balance.',
+          );
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [walletRetryVersion]);
 
   if (loading) {
     return (
@@ -142,7 +170,10 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
   const selectedAvailable = selectedAvailabilityKey
     ? astrologer[selectedAvailabilityKey]
     : false;
-  const minsAvailable = Math.floor(walletBalance / ratePerMin);
+  const minsAvailable =
+    walletBalance === null ? 0 : Math.floor(walletBalance / ratePerMin);
+  const hasEnoughBalance =
+    walletBalance !== null && walletBalance >= ratePerMin;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -229,12 +260,23 @@ export default function AstrologerDetailScreen({navigation, route}: CustomerScre
           <View style={styles.warningBox}>
             <Text>⚠️</Text>
             <Text style={styles.warningText}>
-              Balance ₹{walletBalance} · {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} ₹{ratePerMin}/m · ~{minsAvailable} mins available
+              {walletBalance === null
+                ? walletError ?? 'Loading wallet balance...'
+                : `Balance ₹${walletBalance.toFixed(2)} · ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} ₹${ratePerMin}/m · ~${minsAvailable} mins available`}
             </Text>
           </View>
+          {walletError && (
+            <TouchableOpacity
+              style={styles.walletRetry}
+              onPress={() =>
+                setWalletRetryVersion(version => version + 1)
+              }>
+              <Text style={styles.walletRetryText}>Retry wallet balance</Text>
+            </TouchableOpacity>
+          )}
           <Button
             label="Book Consultation →"
-            disabled={!selectedAvailable}
+            disabled={!selectedAvailable || !hasEnoughBalance}
             onPress={() =>
               navigation.navigate('Book', {
                 astrologerId: astrologer._id,
@@ -286,4 +328,6 @@ const styles = StyleSheet.create({
   bioText: {fontSize: 13, color: Colors.t2, lineHeight: 22},
   warningBox: {backgroundColor: Colors.redDim, borderWidth: 1, borderColor: 'rgba(248,113,113,0.2)', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14},
   warningText: {fontSize: 12, color: Colors.red, flex: 1},
+  walletRetry: {alignSelf: 'center', marginBottom: 12, padding: 4},
+  walletRetryText: {fontSize: 12, fontWeight: '600', color: Colors.gold},
 });
