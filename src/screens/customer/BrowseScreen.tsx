@@ -126,6 +126,7 @@ export default function BrowseScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.filterScroll}
         contentContainerStyle={styles.filterRow}>
         {FILTERS.map(f => (
           <TouchableOpacity
@@ -271,9 +272,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
+  filterScroll: {flexGrow: 0},
   searchIcon: {fontSize: 16, color: Colors.t3},
   searchInp: {flex: 1, fontSize: 14, color: Colors.text, padding: 0},
-  filterRow: {paddingHorizontal: 20, gap: 8, marginBottom: 14},
+  filterRow: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    gap: 8,
+    marginBottom: 14,
+  },
   fChip: {
     paddingVertical: 6,
     paddingHorizontal: 14,
@@ -281,7 +288,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card,
     borderWidth: 1,
     borderColor: Colors.border2,
-    height: 32,
+    minHeight: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
