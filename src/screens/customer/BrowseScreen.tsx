@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card,
     borderWidth: 1,
     borderColor: Colors.border2,
-    minHeight: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
