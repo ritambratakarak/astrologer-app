@@ -520,187 +520,22 @@ All responses are fully typed with TypeScript interfaces:
 - Pagination uses `page` parameter (1-indexed)
 
 GET Api
-/astrologers?page=1&limit=10
-Beraer token
+{{api}}/wallet
 
 {
     "status": 200,
     "success": true,
     "data": {
-        "items": [
-            {
-                "_id": "6aa4330a342ad6c62d400bff",
-                "userId": "6aa4330a342ad6c62d400bfd",
-                "experience": 20,
-                "languages": [
-                    "Hindi",
-                    "Punjabi",
-                    "English"
-                ],
-                "specializations": [
-                    "prashna",
-                    "muhurta",
-                    "vedic"
-                ],
-                "chatRate": 30,
-                "callRate": 45,
-                "videoRate": 60,
-                "rating": 4.9,
-                "totalReviews": 380,
-                "isAvailableForChat": false,
-                "isAvailableForCall": true,
-                "isAvailableForVideo": true,
-                "user": {
-                    "_id": "6aa4330a342ad6c62d400bfd",
-                    "fullName": "Vikram Bhatia",
-                    "isOnline": false
-                }
-            },
-            {
-                "_id": "6aa43309342ad6c62d400be3",
-                "userId": "6aa43309342ad6c62d400be1",
-                "experience": 15,
-                "languages": [
-                    "Hindi",
-                    "English"
-                ],
-                "specializations": [
-                    "vedic",
-                    "kundali",
-                    "muhurta"
-                ],
-                "chatRate": 20,
-                "callRate": 30,
-                "videoRate": 40,
-                "rating": 4.8,
-                "totalReviews": 230,
-                "isAvailableForChat": true,
-                "isAvailableForCall": true,
-                "isAvailableForVideo": false,
-                "user": {
-                    "_id": "6aa43309342ad6c62d400be1",
-                    "fullName": "Pt. Ramesh Tiwari",
-                    "isOnline": false
-                }
-            },
-            {
-                "_id": "6aa4330a342ad6c62d400c0d",
-                "userId": "6aa4330a342ad6c62d400c0b",
-                "experience": 10,
-                "languages": [
-                    "Hindi",
-                    "Gujarati"
-                ],
-                "specializations": [
-                    "kundali",
-                    "vedic",
-                    "muhurta"
-                ],
-                "chatRate": 18,
-                "callRate": 28,
-                "videoRate": 38,
-                "rating": 4.7,
-                "totalReviews": 160,
-                "isAvailableForChat": true,
-                "isAvailableForCall": true,
-                "isAvailableForVideo": false,
-                "user": {
-                    "_id": "6aa4330a342ad6c62d400c0b",
-                    "fullName": "Rajendra Joshi",
-                    "isOnline": false
-                }
-            },
-            {
-                "_id": "6aa4330a342ad6c62d400bf1",
-                "userId": "6aa4330a342ad6c62d400bef",
-                "experience": 12,
-                "languages": [
-                    "Tamil",
-                    "English",
-                    "Telugu"
-                ],
-                "specializations": [
-                    "vastu",
-                    "palmistry"
-                ],
-                "chatRate": 25,
-                "callRate": 35,
-                "videoRate": 50,
-                "rating": 4.6,
-                "totalReviews": 187,
-                "isAvailableForChat": true,
-                "isAvailableForCall": true,
-                "isAvailableForVideo": true,
-                "user": {
-                    "_id": "6aa4330a342ad6c62d400bef",
-                    "fullName": "Suresh Iyer",
-                    "isOnline": false
-                }
-            },
-            {
-                "_id": "6aa4330a342ad6c62d400bea",
-                "userId": "6aa43309342ad6c62d400be8",
-                "experience": 8,
-                "languages": [
-                    "English",
-                    "Malayalam",
-                    "Tamil"
-                ],
-                "specializations": [
-                    "tarot",
-                    "numerology"
-                ],
-                "chatRate": 15,
-                "callRate": 25,
-                "videoRate": 35,
-                "rating": 4.5,
-                "totalReviews": 145,
-                "isAvailableForChat": true,
-                "isAvailableForCall": false,
-                "isAvailableForVideo": true,
-                "user": {
-                    "_id": "6aa43309342ad6c62d400be8",
-                    "fullName": "Kavya Menon",
-                    "isOnline": false
-                }
-            },
-            {
-                "_id": "6aa4330a342ad6c62d400bf8",
-                "userId": "6aa4330a342ad6c62d400bf6",
-                "experience": 3,
-                "languages": [
-                    "Bengali",
-                    "Hindi",
-                    "English"
-                ],
-                "specializations": [
-                    "face_reading",
-                    "lal_kitab"
-                ],
-                "chatRate": 10,
-                "callRate": 18,
-                "videoRate": 25,
-                "rating": 4.2,
-                "totalReviews": 62,
-                "isAvailableForChat": true,
-                "isAvailableForCall": false,
-                "isAvailableForVideo": false,
-                "user": {
-                    "_id": "6aa4330a342ad6c62d400bf6",
-                    "fullName": "Ananya Das",
-                    "isOnline": false
-                }
-            }
-        ],
-        "pagination": {
-            "total": 6,
-            "page": 1,
-            "limit": 10,
-            "totalPages": 1,
-            "hasNextPage": false,
-            "hasPrevPage": false
-        }
+        "_id": "6aa5649066c3885370eab4ce",
+        "userId": "6aa5649066c3885370eab4cc",
+        "balance": 0,
+        "currency": "INR",
+        "totalEarned": 0,
+        "totalSpent": 0,
+        "createdAt": "2026-09-12T14:41:20.300Z",
+        "updatedAt": "2026-09-12T14:41:20.300Z",
+        "__v": 0
     },
-    "message": "Astrologers fetched successfully.",
-    "requestId": "38875598-d0f1-4edb-9715-55aebfa8e582"
+    "message": "Wallet details fetched.",
+    "requestId": "e7981170-1094-4628-8098-4b668efe6d9d"
 }
