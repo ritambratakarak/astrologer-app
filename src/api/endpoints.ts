@@ -68,7 +68,7 @@ export const Endpoints = {
   notifications: {
     list: '/notifications',
     markRead: (id: string) => `/notifications/${id}/read`,
-    markAllRead: '/notifications/mark-all-read',
+    markAllRead: '/notifications/read-all',
   },
 
   // Registration

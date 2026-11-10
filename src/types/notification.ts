@@ -1,17 +1,40 @@
 export type NotificationCategory =
-  | 'session'
+  | 'general'
   | 'wallet'
-  | 'review'
-  | 'request'
-  | 'system'
-  | 'approval';
+  | 'consultation'
+  | 'promotion'
+  | 'astrologer_status'
+  | 'reminder'
+  | (string & {});
 
 export interface AppNotification {
-  id: string;
-  category: NotificationCategory;
+  _id: string;
+  userId: string;
+  type: NotificationCategory;
   title: string;
   body: string;
   isRead: boolean;
-  data?: Record<string, string>;
   createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface NotificationsPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface NotificationsResponse {
+  status: number;
+  success: boolean;
+  data: {
+    items: AppNotification[];
+    pagination: NotificationsPagination;
+  };
+  message: string;
+  requestId: string;
 }
