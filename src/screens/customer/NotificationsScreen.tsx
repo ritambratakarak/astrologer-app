@@ -106,7 +106,7 @@ export default function NotificationsScreen({navigation}: {navigation: any}) {
     }
     setActionError(null);
     try {
-      await notificationService.markRead(notification.userId);
+      await notificationService.markRead(notification._id);
       setNotifications(current =>
         current.map(item =>
           item._id === notification._id ? {...item, isRead: true} : item,
