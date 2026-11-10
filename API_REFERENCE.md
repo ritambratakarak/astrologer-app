@@ -519,70 +519,99 @@ All responses are fully typed with TypeScript interfaces:
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
 
-Get method
-/astrologers/{{astrologer_id}}
-from astrologer list api get the userId and use it  
+Get
+{{api}}/notifications?page=1&limit=20
 
 response
 {
     "status": 200,
     "success": true,
     "data": {
-        "_id": "6aa4330a342ad6c62d400bf1",
-        "userId": {
-            "_id": "6aa4330a342ad6c62d400bef",
-            "fullName": "Suresh Iyer",
-            "phone": "9100000003",
-            "isOnline": false,
-            "createdAt": "2026-09-11T16:57:46.056Z"
-        },
-        "bio": "Vastu consultant and palmist. Helping families design harmonious living spaces for over 12 years.",
-        "experience": 12,
-        "languages": [
-            "Tamil",
-            "English",
-            "Telugu"
+        "items": [
+            {
+                "_id": "6af3347be4f8593b7626dcba",
+                "userId": "6aa5649066c3885370eab4cc",
+                "title": "Welcome to AstroApp!",
+                "body": "Start your cosmic journey. Explore top astrologers and get guidance today.",
+                "type": "general",
+                "isRead": true,
+                "createdAt": "2026-11-10T15:12:59.057Z",
+                "__v": 0,
+                "updatedAt": "2026-11-10T15:12:59.058Z"
+            },
+            {
+                "_id": "6af3347be4f8593b7626dcbb",
+                "userId": "6aa5649066c3885370eab4cc",
+                "title": "Wallet Recharged",
+                "body": "Your wallet has been credited. You are ready to book a consultation.",
+                "type": "wallet",
+                "isRead": false,
+                "createdAt": "2026-11-10T14:12:59.057Z",
+                "__v": 0,
+                "updatedAt": "2026-11-10T15:12:59.058Z"
+            },
+            {
+                "_id": "6af3347be4f8593b7626dcbc",
+                "userId": "6aa5649066c3885370eab4cc",
+                "title": "Consultation Completed",
+                "body": "Your session has ended. Rate your astrologer to help the community.",
+                "type": "consultation",
+                "isRead": true,
+                "createdAt": "2026-11-10T13:12:59.057Z",
+                "__v": 0,
+                "updatedAt": "2026-11-10T15:12:59.058Z"
+            },
+            {
+                "_id": "6af3347be4f8593b7626dcbd",
+                "userId": "6aa5649066c3885370eab4cc",
+                "title": "New Offer",
+                "body": "Get 20% off on your first video call consultation. Limited time only!",
+                "type": "promotion",
+                "isRead": false,
+                "createdAt": "2026-11-10T12:12:59.057Z",
+                "__v": 0,
+                "updatedAt": "2026-11-10T15:12:59.058Z"
+            },
+            {
+                "_id": "6af3347be4f8593b7626dcbe",
+                "userId": "6aa5649066c3885370eab4cc",
+                "title": "Astrologer Online",
+                "body": "Pt. Ramesh Tiwari is now online and available for chat.",
+                "type": "astrologer_status",
+                "isRead": true,
+                "createdAt": "2026-11-10T11:12:59.057Z",
+                "__v": 0,
+                "updatedAt": "2026-11-10T15:12:59.058Z"
+            },
+            {
+                "_id": "6af3347be4f8593b7626dcbf",
+                "userId": "6aa5649066c3885370eab4cc",
+                "title": "Reminder",
+                "body": "You have unused wallet balance. Book a session today!",
+                "type": "reminder",
+                "isRead": false,
+                "createdAt": "2026-11-10T10:12:59.057Z",
+                "__v": 0,
+                "updatedAt": "2026-11-10T15:12:59.058Z"
+            }
         ],
-        "specializations": [
-            "vastu",
-            "palmistry"
-        ],
-        "chatRate": 25,
-        "callRate": 35,
-        "videoRate": 50,
-        "rating": 4.6,
-        "totalReviews": 187,
-        "totalConsultations": 410,
-        "status": "approved",
-        "isAvailableForChat": true,
-        "isAvailableForCall": true,
-        "isAvailableForVideo": true,
-        "documents": [],
-        "degree": "Vastu Shastra Diploma",
-        "certificates": [],
-        "bankDetails": {
-            "accountHolderName": "Suresh Iyer",
-            "accountNumber": "112233445566",
-            "bankName": "ICICI",
-            "ifscCode": "ICIC0003456"
-        },
-        "panCard": {
-            "number": "CDEFSI9012T"
-        },
-        "aadharCard": {
-            "number": "345678901234"
-        },
-        "address": {
-            "city": "Chennai",
-            "state": "Tamil Nadu",
-            "pincode": "600001",
-            "country": "India"
-        },
-        "isKycSubmitted": true,
-        "createdAt": "2026-09-11T16:57:46.076Z",
-        "updatedAt": "2026-09-11T16:57:46.076Z",
-        "__v": 0
+        "pagination": {
+            "total": 6,
+            "page": 1,
+            "limit": 20,
+            "totalPages": 1,
+            "hasNextPage": false,
+            "hasPrevPage": false
+        }
     },
-    "message": "Profile fetched successfully.",
-    "requestId": "492acd33-ac5e-420a-9f52-bf5ee1e0727e"
+    "message": "Notifications fetched successfully.",
+    "requestId": "b3dd461b-e0d1-4be3-a3e1-c62dc2e0d686"
 }
+
+Patch
+{{api}}/notifications/{{notification_id}}/read
+
+list api userId
+
+PATCH
+{{api}}/notifications/read-all
