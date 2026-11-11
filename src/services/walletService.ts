@@ -3,7 +3,7 @@ import {Endpoints} from '../api/endpoints';
 import type {
   WalletBalance,
   WalletBalanceApiResponse,
-  Transaction,
+  TransactionsResponse,
   RechargeRequest,
   RechargeResponse,
 } from '../types/wallet';
@@ -19,12 +19,15 @@ export const walletService = {
     return response.data;
   },
 
-  async getTransactions(page = 1): Promise<Transaction[]> {
-    const {data} = await apiClient.get<Transaction[]>(
+  async getTransactions(page = 1, limit = 20): Promise<TransactionsResponse> {
+    const {data: response} = await apiClient.get<TransactionsResponse>(
       Endpoints.wallet.transactions,
-      {params: {page}},
+      {params: {page, limit}},
     );
-    return data;
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Could not load wallet transactions.');
+    }
+    return response;
   },
 
   async initiateRecharge(

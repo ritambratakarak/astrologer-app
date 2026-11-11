@@ -1,21 +1,46 @@
 export type TransactionType = 'credit' | 'debit';
 export type TransactionCategory =
   | 'recharge'
-  | 'chat'
-  | 'call'
-  | 'video'
+  | 'consultation'
   | 'refund'
   | 'withdrawal'
-  | 'earning';
+  | 'earning'
+  | (string & {});
 
 export interface Transaction {
-  id: string;
+  _id: string;
+  userId: string;
   type: TransactionType;
-  category: TransactionCategory;
+  reason: TransactionCategory;
   amount: number;
   description: string;
   referenceId?: string;
+  referenceModel?: string;
+  balanceBefore: number;
+  balanceAfter: number;
   createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface TransactionsPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface TransactionsResponse {
+  status: number;
+  success: boolean;
+  data: {
+    items: Transaction[];
+    pagination: TransactionsPagination;
+  };
+  message: string;
+  requestId: string;
 }
 
 export interface WalletBalance {

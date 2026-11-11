@@ -8,17 +8,9 @@ import AppHeader from '../../components/common/AppHeader';
 import Button from '../../components/common/Button';
 import type {CustomerStackParamList} from '../../navigation/types';
 import {walletService} from '../../services/walletService';
-import type {WalletBalance} from '../../types/wallet';
+import type {Transaction, WalletBalance} from '../../types/wallet';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
-
-const TRANSACTIONS = [
-  {icon: '💰', category: 'credit', title: 'Wallet Recharge', date: 'Today, 9:15 AM · UPI', amount: '+₹500'},
-  {icon: '💬', category: 'debit', title: 'Chat with Pandit Ramesh', date: 'Today, 10:30 AM · 12 mins', amount: '-₹240'},
-  {icon: '📞', category: 'debit', title: 'Call with Meera Joshi', date: 'Yesterday, 3:45 PM · 15 mins', amount: '-₹375'},
-  {icon: '💰', category: 'credit', title: 'Wallet Recharge', date: 'Jul 26, 2026 · Card', amount: '+₹300'},
-  {icon: '📹', category: 'debit', title: 'Video with Acharya Suresh', date: 'Jul 25, 2026 · 20 mins', amount: '-₹800'},
-];
 
 export default function CustomerWalletScreen() {
   const navigation = useNavigation<Nav>();
@@ -26,6 +18,10 @@ export default function CustomerWalletScreen() {
   const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryVersion, setRetryVersion] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
+  const [transactionsRetryVersion, setTransactionsRetryVersion] = useState(0);
 
   useEffect(() => {
     if (!isFocused) {
@@ -55,6 +51,41 @@ export default function CustomerWalletScreen() {
       isActive = false;
     };
   }, [isFocused, retryVersion]);
+
+  useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+
+    let isActive = true;
+    setTransactionsLoading(true);
+    setTransactionsError(null);
+    walletService
+      .getTransactions(1, 20)
+      .then(response => {
+        if (isActive) {
+          setTransactions(response.data.items);
+        }
+      })
+      .catch(loadError => {
+        if (isActive) {
+          setTransactionsError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Could not load recent transactions.',
+          );
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setTransactionsLoading(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [isFocused, transactionsRetryVersion]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -109,20 +140,53 @@ export default function CustomerWalletScreen() {
 
         <View style={styles.secHdr}><Text style={styles.secTitle}>Recent Transactions</Text></View>
 
-        {TRANSACTIONS.map((tx, i) => (
-          <View key={i} style={styles.txItem}>
-            <View style={[styles.txIcon, tx.category === 'credit' ? styles.txCredit : styles.txDebit]}>
-              <Text style={{fontSize: 16}}>{tx.icon}</Text>
-            </View>
-            <View style={styles.txInfo}>
-              <Text style={styles.txTitle}>{tx.title}</Text>
-              <Text style={styles.txDate}>{tx.date}</Text>
-            </View>
-            <Text style={[styles.txAmount, tx.category === 'credit' ? styles.txAmountCredit : styles.txAmountDebit]}>
-              {tx.amount}
-            </Text>
+        {transactionsLoading ? (
+          <ActivityIndicator color={Colors.gold} style={styles.loader} />
+        ) : transactionsError ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{transactionsError}</Text>
+            <TouchableOpacity
+              onPress={() =>
+                setTransactionsRetryVersion(version => version + 1)
+              }>
+              <Text style={styles.retryText}>Retry</Text>
+            </TouchableOpacity>
           </View>
-        ))}
+        ) : transactions.length === 0 ? (
+          <Text style={styles.emptyTransactions}>No transactions yet.</Text>
+        ) : (
+          transactions.slice(0, 5).map(tx => (
+            <View key={tx._id} style={styles.txItem}>
+              <View
+                style={[
+                  styles.txIcon,
+                  tx.type === 'credit' ? styles.txCredit : styles.txDebit,
+                ]}>
+                <Text style={styles.txEmoji}>
+                  {getTransactionIcon(tx.description, tx.reason)}
+                </Text>
+              </View>
+              <View style={styles.txInfo}>
+                <Text style={styles.txTitle}>
+                  {tx.description || formatTransactionReason(tx.reason)}
+                </Text>
+                <Text style={styles.txDate}>
+                  {formatTransactionDate(tx.createdAt)}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.txAmount,
+                  tx.type === 'credit'
+                    ? styles.txAmountCredit
+                    : styles.txAmountDebit,
+                ]}>
+                {tx.type === 'credit' ? '+' : '-'}₹
+                {tx.amount.toLocaleString('en-IN')}
+              </Text>
+            </View>
+          ))
+        )}
 
         <View style={{padding: 16}}>
           <Button label="View All Transactions" variant="outline" onPress={() => navigation.navigate('Transactions')} />
@@ -153,6 +217,7 @@ const styles = StyleSheet.create({
   secTitle: {fontSize: 16, fontWeight: '700', color: Colors.text},
   txItem: {flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: Colors.border3},
   txIcon: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
+  txEmoji: {fontSize: 16},
   txCredit: {backgroundColor: Colors.greenDim},
   txDebit: {backgroundColor: Colors.redDim},
   txInfo: {flex: 1},
@@ -161,4 +226,31 @@ const styles = StyleSheet.create({
   txAmount: {fontSize: 15, fontWeight: '700'},
   txAmountCredit: {color: Colors.green},
   txAmountDebit: {color: Colors.red},
+  emptyTransactions: {fontSize: 12, color: Colors.t3, textAlign: 'center', paddingVertical: 20},
 });
+
+function formatTransactionDate(createdAt: string): string {
+  const date = new Date(createdAt);
+  return Number.isNaN(date.getTime()) ? createdAt : date.toLocaleString();
+}
+
+function formatTransactionReason(reason: string): string {
+  return reason.charAt(0).toUpperCase() + reason.slice(1);
+}
+
+function getTransactionIcon(description: string, reason: string): string {
+  const value = `${description} ${reason}`.toLowerCase();
+  if (value.includes('recharge')) {
+    return '💰';
+  }
+  if (value.includes('chat')) {
+    return '💬';
+  }
+  if (value.includes('video')) {
+    return '📹';
+  }
+  if (value.includes('call')) {
+    return '📞';
+  }
+  return '↔️';
+}
