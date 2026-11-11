@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Image
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -180,9 +181,10 @@ export default function CustomerHomeScreen() {
                   navigation.navigate('AstrologerDetail', {astrologerUserId: a.userId})
                 }>
                 <View style={styles.acAv}>
-                  <Text style={{fontSize: 32}}>
-                    {astrologerName.charAt(0).toUpperCase()}
-                  </Text>
+                  <Image
+                    source={{uri: a.profilePhoto || 'default_image_url'}}
+                    style={styles.avatarImage}
+                  />
                 </View>
                 <Text style={styles.acName}>{astrologerName}</Text>
                 <Text style={styles.acSpec}>{specialization}</Text>
@@ -303,6 +305,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 14,
+  },
+  avatarImage:{
+    height: 80,
+    width: 140,
+    resizeMode: 'contain',
   },
   rechargeBtnText: {fontSize: 12, fontWeight: '700', color: Colors.text},
   insight: {

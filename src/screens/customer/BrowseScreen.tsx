@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
@@ -164,7 +165,8 @@ export default function BrowseScreen() {
                 navigation.navigate('AstrologerDetail', {astrologerUserId: a.userId})
               }>
               <View style={styles.itemAv}>
-                <Text style={styles.initial}>{name.charAt(0).toUpperCase()}</Text>
+                <Image source={{uri: a.profilePhoto}} style={{height:40, width:40, borderRadius:20, resizeMode:"contain"}} />
+                {/* <Text style={styles.initial}>{a.profilePhoto}</Text> */}
               </View>
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{name}</Text>

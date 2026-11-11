@@ -57,6 +57,7 @@ export interface AstrologerListItem {
   isAvailableForChat: boolean;
   isAvailableForCall: boolean;
   isAvailableForVideo: boolean;
+  profilePhoto: string;
 }
 
 export interface AstrologerDetail {
