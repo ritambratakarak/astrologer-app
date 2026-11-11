@@ -518,3 +518,389 @@ All responses are fully typed with TypeScript interfaces:
 - Failed requests with 401 status trigger automatic token refresh
 - All timestamps are in ISO 8601 format
 - Pagination uses `page` parameter (1-indexed)
+
+Get Api
+{{api}}/wallet/transactions?page=1&limit=20
+
+
+response
+{
+    "status": 200,
+    "success": true,
+    "data": {
+        "items": [
+            {
+                "_id": "6af3eef489eee9f0c5511294",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 1710,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed989eee9f0c551101c",
+                "referenceModel": "Consultation",
+                "balanceBefore": 2000,
+                "balanceAfter": 290,
+                "description": "video consultation payment",
+                "createdAt": "2026-11-09T05:15:09.212Z",
+                "updatedAt": "2026-11-09T05:15:09.212Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef389eee9f0c5511291",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 500,
+                "type": "credit",
+                "reason": "recharge",
+                "balanceBefore": 1500,
+                "balanceAfter": 2000,
+                "description": "Wallet recharge via Razorpay",
+                "createdAt": "2026-11-06T04:28:35.964Z",
+                "updatedAt": "2026-11-06T04:28:35.964Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef489eee9f0c5511296",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 810,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed989eee9f0c5511014",
+                "referenceModel": "Consultation",
+                "balanceBefore": 290,
+                "balanceAfter": 0,
+                "description": "call consultation payment",
+                "createdAt": "2026-11-05T04:48:09.005Z",
+                "updatedAt": "2026-11-05T04:48:09.005Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef489eee9f0c5511298",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 375,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed889eee9f0c551100c",
+                "referenceModel": "Consultation",
+                "balanceBefore": 0,
+                "balanceAfter": 0,
+                "description": "chat consultation payment",
+                "createdAt": "2026-11-01T04:55:08.809Z",
+                "updatedAt": "2026-11-01T04:55:08.809Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef489eee9f0c551129a",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 200,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed889eee9f0c5511004",
+                "referenceModel": "Consultation",
+                "balanceBefore": 0,
+                "balanceAfter": 0,
+                "description": "chat consultation payment",
+                "createdAt": "2026-10-27T04:40:08.238Z",
+                "updatedAt": "2026-10-27T04:40:08.238Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef489eee9f0c551129c",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 750,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed889eee9f0c5511000",
+                "referenceModel": "Consultation",
+                "balanceBefore": 0,
+                "balanceAfter": 0,
+                "description": "video consultation payment",
+                "createdAt": "2026-10-22T05:00:08.128Z",
+                "updatedAt": "2026-10-22T05:00:08.128Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef389eee9f0c551128f",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 1000,
+                "type": "credit",
+                "reason": "recharge",
+                "balanceBefore": 500,
+                "balanceAfter": 1500,
+                "description": "Wallet recharge via Razorpay",
+                "createdAt": "2026-10-22T04:28:35.895Z",
+                "updatedAt": "2026-10-22T04:28:35.895Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef489eee9f0c551129e",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 360,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed889eee9f0c5510ffc",
+                "referenceModel": "Consultation",
+                "balanceBefore": 0,
+                "balanceAfter": 0,
+                "description": "call consultation payment",
+                "createdAt": "2026-10-17T04:50:08.005Z",
+                "updatedAt": "2026-10-17T04:50:08.005Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef489eee9f0c55112a0",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 375,
+                "type": "debit",
+                "reason": "consultation",
+                "referenceId": "6af3eed789eee9f0c5510ff8",
+                "referenceModel": "Consultation",
+                "balanceBefore": 0,
+                "balanceAfter": 0,
+                "description": "chat consultation payment",
+                "createdAt": "2026-10-12T04:45:07.847Z",
+                "updatedAt": "2026-10-12T04:45:07.847Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eef389eee9f0c551128d",
+                "userId": "6aa5649066c3885370eab4cc",
+                "amount": 500,
+                "type": "credit",
+                "reason": "recharge",
+                "balanceBefore": 0,
+                "balanceAfter": 500,
+                "description": "Wallet recharge via Razorpay",
+                "createdAt": "2026-10-07T04:28:35.837Z",
+                "updatedAt": "2026-10-07T04:28:35.837Z",
+                "__v": 0
+            }
+        ],
+        "pagination": {
+            "total": 10,
+            "page": 1,
+            "limit": 20,
+            "totalPages": 1,
+            "hasNextPage": false,
+            "hasPrevPage": false
+        }
+    },
+    "message": "Transactions fetched successfully.",
+    "requestId": "eb32fd24-4fa1-4dcc-9ff4-1215e4e23bcb"
+}
+
+
+Get Api
+{{api}}/consultations?page=1&limit=10
+
+{
+    "status": 200,
+    "success": true,
+    "data": {
+        "items": [
+            {
+                "_id": "6af3eed989eee9f0c5511024",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400c0b",
+                    "fullName": "Rajendra Joshi"
+                },
+                "type": "call",
+                "status": "accepted",
+                "ratePerMinute": 28,
+                "durationMinutes": 0,
+                "totalAmount": 0,
+                "isReviewed": false,
+                "createdAt": "2026-11-11T04:28:09.404Z",
+                "updatedAt": "2026-11-11T04:28:09.404Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed989eee9f0c5511020",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400bfd",
+                    "fullName": "Vikram Bhatia"
+                },
+                "type": "chat",
+                "status": "pending",
+                "ratePerMinute": 30,
+                "durationMinutes": 0,
+                "totalAmount": 0,
+                "customerNote": "Financial decisions this year",
+                "isReviewed": false,
+                "createdAt": "2026-11-11T04:28:09.308Z",
+                "updatedAt": "2026-11-11T04:28:09.308Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed989eee9f0c551101c",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400c0b",
+                    "fullName": "Rajendra Joshi"
+                },
+                "type": "video",
+                "status": "completed",
+                "ratePerMinute": 38,
+                "startedAt": "2026-11-09T04:30:09.212Z",
+                "endedAt": "2026-11-09T05:15:09.212Z",
+                "durationMinutes": 45,
+                "totalAmount": 1710,
+                "customerNote": "Upcoming travel plans",
+                "isReviewed": true,
+                "createdAt": "2026-11-09T04:28:09.212Z",
+                "updatedAt": "2026-11-09T04:28:09.212Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed989eee9f0c5511018",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400bef",
+                    "fullName": "Suresh Iyer"
+                },
+                "type": "chat",
+                "status": "rejected",
+                "ratePerMinute": 25,
+                "durationMinutes": 0,
+                "totalAmount": 0,
+                "customerNote": "Marriage compatibility check",
+                "isReviewed": false,
+                "createdAt": "2026-11-07T04:28:09.106Z",
+                "updatedAt": "2026-11-07T04:28:09.106Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed989eee9f0c5511014",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400bfd",
+                    "fullName": "Vikram Bhatia"
+                },
+                "type": "call",
+                "status": "completed",
+                "ratePerMinute": 45,
+                "startedAt": "2026-11-05T04:30:09.005Z",
+                "endedAt": "2026-11-05T04:48:09.005Z",
+                "durationMinutes": 18,
+                "totalAmount": 810,
+                "astrologerNote": "Saturn transit affecting 7th house. Suggested patience.",
+                "isReviewed": false,
+                "createdAt": "2026-11-05T04:28:09.005Z",
+                "updatedAt": "2026-11-05T04:28:09.005Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed889eee9f0c5511010",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400bef",
+                    "fullName": "Suresh Iyer"
+                },
+                "type": "video",
+                "status": "cancelled",
+                "ratePerMinute": 50,
+                "durationMinutes": 0,
+                "totalAmount": 0,
+                "customerNote": "Financial decisions this year",
+                "cancellationReason": "Customer not available",
+                "isReviewed": false,
+                "createdAt": "2026-11-03T04:28:08.906Z",
+                "updatedAt": "2026-11-03T04:28:08.906Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed889eee9f0c551100c",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa43309342ad6c62d400be8",
+                    "fullName": "Kavya Menon"
+                },
+                "type": "chat",
+                "status": "completed",
+                "ratePerMinute": 15,
+                "startedAt": "2026-11-01T04:30:08.809Z",
+                "endedAt": "2026-11-01T04:55:08.809Z",
+                "durationMinutes": 25,
+                "totalAmount": 375,
+                "customerNote": "Health concerns for family",
+                "astrologerNote": "Moon in 12th — overseas opportunity likely.",
+                "isReviewed": false,
+                "createdAt": "2026-11-01T04:28:08.809Z",
+                "updatedAt": "2026-11-01T04:28:08.809Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed889eee9f0c5511008",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa43309342ad6c62d400be1",
+                    "fullName": "Pt. Ramesh Tiwari"
+                },
+                "type": "call",
+                "status": "cancelled",
+                "ratePerMinute": 30,
+                "durationMinutes": 0,
+                "totalAmount": 0,
+                "customerNote": "Need guidance on career change",
+                "cancellationReason": "Rescheduled for later",
+                "isReviewed": false,
+                "createdAt": "2026-10-30T04:28:08.374Z",
+                "updatedAt": "2026-10-30T04:28:08.374Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed889eee9f0c5511004",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa43309342ad6c62d400be1",
+                    "fullName": "Pt. Ramesh Tiwari"
+                },
+                "type": "chat",
+                "status": "completed",
+                "ratePerMinute": 20,
+                "startedAt": "2026-10-27T04:30:08.238Z",
+                "endedAt": "2026-10-27T04:40:08.238Z",
+                "durationMinutes": 10,
+                "totalAmount": 200,
+                "customerNote": "Relationship advice needed",
+                "astrologerNote": "Lagnesh strong. Career progress expected.",
+                "isReviewed": false,
+                "createdAt": "2026-10-27T04:28:08.238Z",
+                "updatedAt": "2026-10-27T04:28:08.238Z",
+                "__v": 0
+            },
+            {
+                "_id": "6af3eed889eee9f0c5511000",
+                "customerId": "6aa5649066c3885370eab4cc",
+                "astrologerId": {
+                    "_id": "6aa4330a342ad6c62d400bf6",
+                    "fullName": "Ananya Das"
+                },
+                "type": "video",
+                "status": "completed",
+                "ratePerMinute": 25,
+                "startedAt": "2026-10-22T04:30:08.128Z",
+                "endedAt": "2026-10-22T05:00:08.128Z",
+                "durationMinutes": 30,
+                "totalAmount": 750,
+                "customerNote": "Business venture timing",
+                "astrologerNote": "Saturn transit affecting 7th house. Suggested patience.",
+                "isReviewed": true,
+                "createdAt": "2026-10-22T04:28:08.128Z",
+                "updatedAt": "2026-10-22T04:28:08.128Z",
+                "__v": 0
+            }
+        ],
+        "pagination": {
+            "total": 12,
+            "page": 1,
+            "limit": 10,
+            "totalPages": 2,
+            "hasNextPage": true,
+            "hasPrevPage": false
+        }
+    },
+    "message": "Consultation fetched successfully.",
+    "requestId": "4fcb0028-6272-487c-929e-47ebe8229e55"
+}
+
