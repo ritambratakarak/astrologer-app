@@ -2,11 +2,23 @@ import {apiClient} from '../api/client';
 import {Endpoints} from '../api/endpoints';
 import type {
   Consultation,
+  ConsultationListResponse,
   BookConsultationRequest,
   ChatMessage,
 } from '../types/consultation';
 
 export const consultationService = {
+  async getConsultations(page = 1, limit = 10): Promise<ConsultationListResponse> {
+    const {data: response} = await apiClient.get<ConsultationListResponse>(
+      Endpoints.consultations.list,
+      {params: {page, limit}},
+    );
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Could not load consultations.');
+    }
+    return response;
+  },
+
   async book(payload: BookConsultationRequest): Promise<Consultation> {
     const {data} = await apiClient.post<Consultation>(
       Endpoints.consultations.book,

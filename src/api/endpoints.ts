@@ -36,6 +36,7 @@ export const Endpoints = {
 
   // Consultations
   consultations: {
+    list: '/consultations',
     book: '/consultations/book',
     cancel: (id: string) => `/consultations/${id}/cancel`,
     accept: (id: string) => `/consultations/${id}/accept`,

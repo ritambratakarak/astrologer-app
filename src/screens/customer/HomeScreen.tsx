@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   View,
@@ -17,14 +17,11 @@ import {tokenManager} from '../../security/tokenManager';
 import type {CustomerStackParamList} from '../../navigation/types';
 import {walletService} from '../../services/walletService';
 import {astrologerService} from '../../services/astrologerService';
+import {consultationService} from '../../services/consultationService';
 import type {AstrologerListItem} from '../../types/astrologer';
+import type {ConsultationListItem} from '../../types/consultation';
 
 type Nav = NativeStackNavigationProp<CustomerStackParamList>;
-
-const RECENT = [
-  {astrologer: 'Pandit Ramesh', emoji: '🧙', detail: 'Chat · 24 mins · ₹480'},
-  {astrologer: 'Meera Joshi', emoji: '🌙', detail: 'Call · 15 mins · ₹225'},
-];
 
 export default function CustomerHomeScreen() {
   const navigation = useNavigation<Nav>();
@@ -34,6 +31,37 @@ export default function CustomerHomeScreen() {
   const [astrologers, setAstrologers] = useState<AstrologerListItem[]>([]);
   const [astrologersLoading, setAstrologersLoading] = useState(true);
   const [astrologersError, setAstrologersError] = useState<string | null>(null);
+  const [consultations, setConsultations] = useState<ConsultationListItem[]>([]);
+  const [consultationsLoading, setConsultationsLoading] = useState(true);
+  const [consultationsError, setConsultationsError] = useState<string | null>(null);
+  const consultationsFocusedRef = useRef(false);
+
+  const loadConsultations = useCallback(async () => {
+    if (!consultationsFocusedRef.current) {
+      return;
+    }
+
+    setConsultationsLoading(true);
+    setConsultationsError(null);
+    try {
+      const response = await consultationService.getConsultations(1, 10);
+      if (consultationsFocusedRef.current) {
+        setConsultations(response.data.items);
+      }
+    } catch (loadError) {
+      if (consultationsFocusedRef.current) {
+        setConsultationsError(
+          loadError instanceof Error
+            ? loadError.message
+            : 'Could not load recent consultations.',
+        );
+      }
+    } finally {
+      if (consultationsFocusedRef.current) {
+        setConsultationsLoading(false);
+      }
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,6 +88,17 @@ export default function CustomerHomeScreen() {
         isActive = false;
       };
     }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      consultationsFocusedRef.current = true;
+      loadConsultations();
+
+      return () => {
+        consultationsFocusedRef.current = false;
+      };
+    }, [loadConsultations]),
   );
 
   useFocusEffect(
@@ -215,31 +254,43 @@ export default function CustomerHomeScreen() {
         {/* Recent Consultations */}
         <View style={styles.sectionHdr}>
           <Text style={styles.secTitle}>Recent Consultations</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Transactions')}>
-            <Text style={styles.seeAll}>History</Text>
-          </TouchableOpacity>
         </View>
-        {RECENT.map((r, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.recentItem}
-            onPress={() => navigation.navigate('SessionEnded', {
-              durationMinutes: 24,
-              amountCharged: 480,
-              astrologerName: r.astrologer,
-              balanceLeft: 10,
-              consultationId: `demo-${i}`,
-            })}>
-            <View style={styles.recentAv}>
-              <Text style={{fontSize: 16}}>{r.emoji}</Text>
+        {consultationsLoading ? (
+          <ActivityIndicator color={Colors.gold} style={styles.consultationsLoading} />
+        ) : consultationsError ? (
+          <View style={styles.consultationsEmpty}>
+            <Text style={styles.consultationsError}>{consultationsError}</Text>
+            <TouchableOpacity
+              onPress={loadConsultations}>
+              <Text style={styles.consultationsRetry}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : consultations.length === 0 ? (
+          <Text style={styles.consultationsEmpty}>No consultations yet.</Text>
+        ) : (
+          consultations.slice(0, 5).map(consultation => (
+            <View key={consultation._id} style={styles.recentItem}>
+              <View style={styles.recentAv}>
+                <Text style={styles.recentEmoji}>
+                  {getConsultationIcon(consultation.type)}
+                </Text>
+              </View>
+              <View style={styles.recentInfo}>
+                <Text style={styles.recentName}>
+                  {consultation.astrologerId.fullName}
+                </Text>
+                <Text style={styles.recentDetail}>
+                  {formatConsultationDetail(consultation)}
+                </Text>
+              </View>
+              <Chip
+                label={formatStatus(consultation.status)}
+                variant={getStatusVariant(consultation.status)}
+                small
+              />
             </View>
-            <View style={{flex: 1}}>
-              <Text style={styles.recentName}>{r.astrologer}</Text>
-              <Text style={styles.recentDetail}>{r.detail}</Text>
-            </View>
-            <Chip label="Completed" variant="green" />
-          </TouchableOpacity>
-        ))}
+          ))
+        )}
 
         <View style={{height: 100}} />
       </ScrollView>
@@ -382,4 +433,58 @@ const styles = StyleSheet.create({
   },
   recentName: {fontSize: 13, fontWeight: '700', color: Colors.text},
   recentDetail: {fontSize: 11, color: Colors.t2, marginTop: 2},
+  recentInfo: {flex: 1},
+  recentEmoji: {fontSize: 16},
+  consultationsLoading: {paddingVertical: 24},
+  consultationsEmpty: {paddingHorizontal: 20, paddingVertical: 16, fontSize: 12, color: Colors.t2, textAlign: 'center'},
+  consultationsError: {fontSize: 12, color: Colors.red, textAlign: 'center'},
+  consultationsRetry: {fontSize: 12, fontWeight: '700', color: Colors.gold, marginTop: 8},
 });
+
+function getConsultationIcon(type: ConsultationListItem['type']): string {
+  switch (type) {
+    case 'chat':
+      return '💬';
+    case 'call':
+      return '📞';
+    case 'video':
+      return '📹';
+  }
+}
+
+function formatConsultationDetail(consultation: ConsultationListItem): string {
+  const details = [formatConsultationType(consultation.type)];
+  if (consultation.durationMinutes > 0) {
+    details.push(`${consultation.durationMinutes} mins`);
+  }
+  if (consultation.totalAmount > 0) {
+    details.push(`₹${consultation.totalAmount.toLocaleString('en-IN')}`);
+  }
+  return details.join(' · ');
+}
+
+function formatConsultationType(type: ConsultationListItem['type']): string {
+  return type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+function formatStatus(status: ConsultationListItem['status']): string {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function getStatusVariant(
+  status: ConsultationListItem['status'],
+): 'green' | 'red' | 'blue' | 'gold' {
+  switch (status) {
+    case 'completed':
+      return 'green';
+    case 'rejected':
+    case 'declined':
+    case 'cancelled':
+      return 'red';
+    case 'active':
+    case 'accepted':
+      return 'blue';
+    default:
+      return 'gold';
+  }
+}
